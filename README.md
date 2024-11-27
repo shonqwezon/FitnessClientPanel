@@ -7,4 +7,4 @@
 * Автоматически менять стоимость тарифа в зависимости от загруженности центра
 * Добавлять/удалять менеджера
 ## ERD
-![ERD](https://github.com/shonqwezon/FitnessClientPanel/blob/main/FitnessClientPanel.png)
+![ERD](https://github.com/shonqwezon/FitnessClientPanel/blob/main/docs/FitnessClientPanel.png)
