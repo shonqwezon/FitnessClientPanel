@@ -1,3 +1,3 @@
 import tkinter as tk
 
-from .MainApplication import MainApplication
+from .mainApplication import MainApplication
