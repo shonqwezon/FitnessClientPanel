@@ -1,8 +1,10 @@
-from . import gui, setup_logger
+from . import setup_logger
+from app.gui.MainApplication import MainApplication
+
 
 logger = setup_logger(__name__)
 
+
 if __name__ == "__main__":
-    root = gui.tk.Tk()
-    gui.MainApplication(root)
-    root.mainloop()
+    app = MainApplication()
+    app.mainloop()
