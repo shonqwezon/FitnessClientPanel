@@ -5,7 +5,7 @@ CREATE TABLE IF NOT EXISTS manager (
     email VARCHAR(50) UNIQUE NOT NULL,
     password_hash VARCHAR(64) NOT NULL,
     sportcenter_id INTEGER NOT NULL,
-    FOREIGN KEY (sportcenter_id) REFERENCES sportcenter(id)
+    CONSTRAINT fk_sportcenter_id FOREIGN KEY (sportcenter_id) REFERENCES sportcenter(id)
         ON UPDATE CASCADE ON DELETE CASCADE
         DEFERRABLE INITIALLY DEFERRED -- Для создания таблиц без конфликтов
 );
