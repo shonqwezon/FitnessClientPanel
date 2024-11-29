@@ -6,6 +6,6 @@ CREATE TABLE IF NOT EXISTS plan (
     create_date DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     sportcenter_id INTEGER NOT NULL,
     CONSTRAINT fk_sportcenter_id FOREIGN KEY (sportcenter_id) REFERENCES sportcenter(id)
-        ON UPDATE CASCADE ON DELETE SET NULL
+        ON UPDATE CASCADE ON DELETE CASCADE
         DEFERRABLE INITIALLY DEFERRED -- Для создания таблиц без конфликтов
 );
