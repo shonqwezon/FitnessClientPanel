@@ -7,7 +7,7 @@ CREATE TABLE IF NOT EXISTS manager (
     sportcenter_id INTEGER NULL,
     FOREIGN KEY (sportcenter_id) REFERENCES sportcenter(id)
         ON UPDATE CASCADE ON DELETE CASCADE
-        DEFERRABLE INITIALLY DEFERRED; -- Для создания таблиц без конфликтов
+        DEFERRABLE INITIALLY DEFERRED -- Для создания таблиц без конфликтов
 );
 
 CREATE INDEX idx_fullname ON manager (fullname); -- Для быстрого поиска по имени
