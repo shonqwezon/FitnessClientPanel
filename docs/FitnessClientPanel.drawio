@@ -1,6 +1,6 @@
 <mxfile host="Electron" agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) draw.io/24.7.17 Chrome/128.0.6613.36 Electron/32.0.1 Safari/537.36" version="24.7.17">
   <diagram id="R2lEEEUBdFMjLlhIrx00" name="Page-1">
-    <mxGraphModel dx="2403" dy="1029" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="2000" pageHeight="800" background="#1A1A1A" math="0" shadow="0" extFonts="Permanent Marker^https://fonts.googleapis.com/css?family=Permanent+Marker">
+    <mxGraphModel dx="1562" dy="669" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="2000" pageHeight="800" background="#1A1A1A" math="0" shadow="0" extFonts="Permanent Marker^https://fonts.googleapis.com/css?family=Permanent+Marker">
       <root>
         <mxCell id="0" />
         <mxCell id="1" parent="0" />
@@ -863,29 +863,35 @@
         <mxCell id="PEORHs8qoAinL320cWrQ-4" value="Пароль" style="ellipse;whiteSpace=wrap;html=1;align=center;" parent="1" vertex="1">
           <mxGeometry x="22.5" y="370" width="75" height="30" as="geometry" />
         </mxCell>
-        <mxCell id="nF9xPtAXorvDzo5LxtlZ-2" style="rounded=0;hachureGap=4;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0;exitDx=0;exitDy=0;entryX=0.25;entryY=1;entryDx=0;entryDy=0;fontFamily=Architects Daughter;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3DArchitects%2BDaughter;endArrow=none;endFill=0;" edge="1" parent="1" source="nF9xPtAXorvDzo5LxtlZ-1" target="DPAicfXmsq0XAQL9fjLa-95">
+        <mxCell id="nF9xPtAXorvDzo5LxtlZ-2" style="rounded=0;hachureGap=4;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0;exitDx=0;exitDy=0;entryX=0.25;entryY=1;entryDx=0;entryDy=0;fontFamily=Architects Daughter;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3DArchitects%2BDaughter;endArrow=none;endFill=0;" parent="1" source="nF9xPtAXorvDzo5LxtlZ-1" target="DPAicfXmsq0XAQL9fjLa-95" edge="1">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
-        <mxCell id="nF9xPtAXorvDzo5LxtlZ-4" style="rounded=0;orthogonalLoop=1;jettySize=auto;html=1;startArrow=none;startFill=0;endArrow=none;endFill=0;dashed=1;entryX=0.255;entryY=0.08;entryDx=0;entryDy=0;entryPerimeter=0;" edge="1" parent="1" source="nF9xPtAXorvDzo5LxtlZ-1" target="nF9xPtAXorvDzo5LxtlZ-3">
+        <mxCell id="nF9xPtAXorvDzo5LxtlZ-4" style="rounded=0;orthogonalLoop=1;jettySize=auto;html=1;startArrow=none;startFill=0;endArrow=none;endFill=0;dashed=1;entryX=0.255;entryY=0.08;entryDx=0;entryDy=0;entryPerimeter=0;" parent="1" source="nF9xPtAXorvDzo5LxtlZ-1" target="nF9xPtAXorvDzo5LxtlZ-3" edge="1">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
-        <mxCell id="nF9xPtAXorvDzo5LxtlZ-1" value="Баланс" style="ellipse;whiteSpace=wrap;html=1;align=center;" vertex="1" parent="1">
+        <mxCell id="nF9xPtAXorvDzo5LxtlZ-1" value="Баланс" style="ellipse;whiteSpace=wrap;html=1;align=center;" parent="1" vertex="1">
           <mxGeometry x="25" y="640" width="75" height="30" as="geometry" />
         </mxCell>
-        <mxCell id="nF9xPtAXorvDzo5LxtlZ-3" value="Автоматически обновляется при&lt;br&gt;присвоении или удалении тарифа" style="text;html=1;align=left;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;" vertex="1" parent="1">
+        <mxCell id="nF9xPtAXorvDzo5LxtlZ-3" value="Автоматически обновляется при&lt;br&gt;присвоении или удалении тарифа" style="text;html=1;align=left;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;" parent="1" vertex="1">
           <mxGeometry x="10" y="730" width="210" height="40" as="geometry" />
         </mxCell>
-        <mxCell id="nF9xPtAXorvDzo5LxtlZ-5" value="Финальная&lt;br&gt;стоимость" style="ellipse;whiteSpace=wrap;html=1;align=center;" vertex="1" parent="1">
+        <mxCell id="nF9xPtAXorvDzo5LxtlZ-5" value="Финальная&lt;br&gt;стоимость" style="ellipse;whiteSpace=wrap;html=1;align=center;" parent="1" vertex="1">
           <mxGeometry x="260" y="605" width="85" height="50" as="geometry" />
         </mxCell>
-        <mxCell id="nF9xPtAXorvDzo5LxtlZ-6" style="rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.303;entryY=0.88;entryDx=0;entryDy=0;entryPerimeter=0;endArrow=none;endFill=0;" edge="1" parent="1" source="nF9xPtAXorvDzo5LxtlZ-5" target="DPAicfXmsq0XAQL9fjLa-101">
+        <mxCell id="nF9xPtAXorvDzo5LxtlZ-6" style="rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.303;entryY=0.88;entryDx=0;entryDy=0;entryPerimeter=0;endArrow=none;endFill=0;" parent="1" source="nF9xPtAXorvDzo5LxtlZ-5" target="DPAicfXmsq0XAQL9fjLa-101" edge="1">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
-        <mxCell id="nF9xPtAXorvDzo5LxtlZ-7" value="Автоматически определяется в зависимости&lt;br&gt;от суммы стоимости услуг, базовой стоимости тарифа и&lt;br&gt;коэфицента стоимости спортцентра" style="text;html=1;align=left;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;" vertex="1" parent="1">
+        <mxCell id="nF9xPtAXorvDzo5LxtlZ-7" value="Автоматически определяется в зависимости&lt;br&gt;от суммы стоимости услуг, базовой стоимости тарифа и&lt;br&gt;коэфицента стоимости спортцентра" style="text;html=1;align=left;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;" parent="1" vertex="1">
           <mxGeometry x="260" y="720" width="340" height="60" as="geometry" />
         </mxCell>
-        <mxCell id="nF9xPtAXorvDzo5LxtlZ-8" style="rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.126;entryY=0.04;entryDx=0;entryDy=0;entryPerimeter=0;endArrow=none;endFill=0;dashed=1;" edge="1" parent="1" source="nF9xPtAXorvDzo5LxtlZ-5" target="nF9xPtAXorvDzo5LxtlZ-7">
+        <mxCell id="nF9xPtAXorvDzo5LxtlZ-8" style="rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.126;entryY=0.04;entryDx=0;entryDy=0;entryPerimeter=0;endArrow=none;endFill=0;dashed=1;" parent="1" source="nF9xPtAXorvDzo5LxtlZ-5" target="nF9xPtAXorvDzo5LxtlZ-7" edge="1">
           <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="ppEcLnrbULPbf-uLMRH0-2" style="rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.5;entryY=1;entryDx=0;entryDy=0;exitX=0.362;exitY=-0.05;exitDx=0;exitDy=0;exitPerimeter=0;endArrow=none;endFill=0;dashed=1;" edge="1" parent="1" source="ppEcLnrbULPbf-uLMRH0-1" target="DPAicfXmsq0XAQL9fjLa-92">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="ppEcLnrbULPbf-uLMRH0-1" value="Тариф автоматически удаляется,&lt;br&gt;если из него были исключены все услуги" style="text;html=1;align=left;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;" vertex="1" parent="1">
+          <mxGeometry x="710" y="730" width="250" height="40" as="geometry" />
         </mxCell>
       </root>
     </mxGraphModel>
