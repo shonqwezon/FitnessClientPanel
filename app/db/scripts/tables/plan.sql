@@ -4,5 +4,7 @@ CREATE TABLE IF NOT EXISTS plan (
     begin_time TIME NOT NULL,
     end_time TIME NOT NULL,
     create_date TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    sportcenter_id INTEGER NOT NULL
+    sportcenter_id INTEGER NOT NULL,
+    CONSTRAINT base_cost_check CHECK (base_cost >= 0),
+    CONSTRAINT begin_end_time_check CHECK (begin_time < end_time)
 );
