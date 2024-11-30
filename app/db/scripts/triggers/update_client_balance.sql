@@ -20,6 +20,7 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
+
 CREATE OR REPLACE TRIGGER trigger_update_balance
 AFTER INSERT OR DELETE ON client_plan
 FOR EACH ROW EXECUTE FUNCTION update_client_balance();
