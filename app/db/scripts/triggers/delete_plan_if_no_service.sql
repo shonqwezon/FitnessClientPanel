@@ -10,6 +10,6 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
-CREATE TRIGGER trigger_delete_plan_if_no_service
+CREATE OR REPLACE TRIGGER trigger_delete_plan_if_no_service
 AFTER DELETE ON plan_service
 FOR EACH ROW EXECUTE FUNCTION delete_plan_if_no_service();
