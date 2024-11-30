@@ -4,4 +4,4 @@ CREATE TABLE IF NOT EXISTS service (
     cost NUMERIC(5, 2) NOT NULL
 );
 
-CREATE INDEX idx_service_description ON service (description);
+CREATE INDEX IF NOT EXISTS idx_service_description ON service (description);

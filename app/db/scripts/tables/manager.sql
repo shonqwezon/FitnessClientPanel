@@ -7,4 +7,4 @@ CREATE TABLE IF NOT EXISTS manager (
     sportcenter_id INTEGER NOT NULL
 );
 
-CREATE INDEX idx_manager_fullname ON manager (fullname); -- Для быстрого поиска по имени
+CREATE INDEX IF NOT EXISTS idx_manager_fullname ON manager (fullname); -- Для быстрого поиска по имени

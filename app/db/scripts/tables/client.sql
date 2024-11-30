@@ -5,4 +5,4 @@ CREATE TABLE IF NOT EXISTS client (
     reg_date TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
-CREATE INDEX idx_client_fullname ON client (fullname);
+CREATE INDEX IF NOT EXISTS idx_client_fullname ON client (fullname);
