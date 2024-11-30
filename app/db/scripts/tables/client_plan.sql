@@ -3,11 +3,5 @@ CREATE TABLE IF NOT EXISTS client_plan (
     plan_id INTEGER NOT NULL,
     final_cost NUMERIC(8, 2) NOT NULL,
     plan_begin_date DATE NOT NULL DEFAULT CURRENT_DATE,
-    plan_end_date DATE NOT NULL,
-    CONSTRAINT fk_client_id FOREIGN KEY (client_id) REFERENCES client(id)
-        ON UPDATE CASCADE ON DELETE CASCADE
-        DEFERRABLE INITIALLY DEFERRED,
-    CONSTRAINT fk_plan_id FOREIGN KEY (plan_id) REFERENCES plan(id)
-        ON UPDATE CASCADE ON DELETE CASCADE
-        DEFERRABLE INITIALLY DEFERRED
+    plan_end_date DATE NOT NULL
 );
