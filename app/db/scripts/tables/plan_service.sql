@@ -1,4 +1,4 @@
 CREATE TABLE IF NOT EXISTS plan_service (
-    plan_id INTEGER NOT NULL,
-    service_id INTEGER NOT NULL
+    plan_id INTEGER PRIMARY KEY,
+    service_id INTEGER PRIMARY KEY
 );
