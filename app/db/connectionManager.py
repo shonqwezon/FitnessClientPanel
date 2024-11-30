@@ -1,6 +1,8 @@
 from contextlib import contextmanager
+from typing import Any, Generator
 
 import psycopg2.pool
+from psycopg2.extensions import connection
 
 from app import setup_logger
 
@@ -21,8 +23,8 @@ class ConnectionManager:
             raise
 
     @contextmanager
-    def get_connection(self):
-        conn = None
+    def get_connection(self) -> Generator[Any | connection, Any, None]:
+        conn: connection = None
         try:
             conn = self.pool.getconn()
             yield conn
