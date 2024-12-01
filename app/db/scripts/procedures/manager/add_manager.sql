@@ -6,6 +6,6 @@ AS $$
 BEGIN
     INSERT INTO manager (fullname, email, password_hash, sportcenter_id)
         VALUES (in_fullname, in_email, in_password_hash, in_sportcenter_id);
-    RAISE NOTICE 'Manager "%" added successfully.', in_email;
+    RAISE NOTICE 'Manager "%" has been added successfully.', in_email;
 END;
 $$ LANGUAGE plpgsql;
