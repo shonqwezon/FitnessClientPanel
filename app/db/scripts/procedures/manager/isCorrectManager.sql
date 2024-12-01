@@ -14,4 +14,4 @@ BEGIN
 
     RETURN result;
 END;
-$$ LANGUAGE plpgsql;
+$$ LANGUAGE plpgsql STABLE;

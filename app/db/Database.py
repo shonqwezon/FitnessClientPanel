@@ -1,3 +1,4 @@
+from os import getenv
 from pathlib import Path
 
 import psycopg2
@@ -56,6 +57,11 @@ class Database:
                     with open(proc, "r", encoding="utf-8") as sql_file:
                         cursor.execute(sql_file.read())
             conn.commit()
+
+    def is_admin(login: str, password: str):
+        return (
+            getenv("ADMIN_LOGIN") == login.strip() and getenv("ADMIN_PASSWORD") == password.strip()
+        )
 
     def close(self):
         logger.info("Close db")

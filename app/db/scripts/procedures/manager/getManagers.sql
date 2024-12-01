@@ -1,7 +1,7 @@
 CREATE OR REPLACE FUNCTION get_manager_table()
-RETURNS TABLE (fullname TEXT, assign_date DATE, email TEXT) AS
+RETURNS TABLE (fullname VARCHAR(50), assign_date TIMESTAMP, email VARCHAR(50)) AS
 $$
 BEGIN
-    RETURN QUERY SELECT fullname, assign_date, email FROM manager;
+    RETURN QUERY SELECT m.fullname, m.assign_date, m.email FROM manager AS m;
 END;
 $$ LANGUAGE plpgsql;
