@@ -7,6 +7,6 @@ AS $$
 BEGIN
     INSERT INTO sportcenter (name, address, open_time, close_time, cost_ratio)
         VALUES (in_name, in_address, in_open_time, in_close_time, in_cost_ratio);
-    RAISE NOTICE 'Sportcenter "%" added successfully.', in_name;
+    RAISE NOTICE 'Sportcenter "%" has been added successfully.', in_name;
 END;
 $$ LANGUAGE plpgsql;
