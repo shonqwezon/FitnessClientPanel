@@ -1,18 +1,18 @@
 CREATE OR REPLACE PROCEDURE delete_manager(
-    fullname VARCHAR(50)
+    in_fullname VARCHAR(50)
 )
 AS $$
 DECLARE
     result BOOLEAN := FALSE;
 BEGIN
-    DELETE FROM manager AS m
-    WHERE m.fullname = fullname
+    DELETE FROM manager
+    WHERE fullname = in_fullname
     RETURNING TRUE INTO result;
 
     IF result THEN
-        RAISE NOTICE 'Manager "%" has been deleted successfully.', fullname;
+        RAISE NOTICE 'Manager "%" has been deleted successfully.', in_fullname;
     ELSE
-        RAISE NOTICE 'Manager "%" does not exist.', fullname;
+        RAISE NOTICE 'Manager "%" does not exist.', in_fullname;
     END IF;
 END;
 $$ LANGUAGE plpgsql;

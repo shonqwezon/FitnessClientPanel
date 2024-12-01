@@ -1,6 +1,6 @@
 CREATE OR REPLACE FUNCTION is_correct_manager(
-    email VARCHAR(50),
-    password_hash VARCHAR(64)
+    in_email VARCHAR(50),
+    in_password_hash VARCHAR(64)
 )
 RETURNS BOOLEAN AS $$
 DECLARE
@@ -8,8 +8,8 @@ DECLARE
 BEGIN
     SELECT EXISTS (
         SELECT 1
-        FROM manager AS m
-        WHERE m.email = email AND m.password_hash = password_hash
+        FROM manager
+        WHERE email = in_email AND password_hash = in_password_hash
     ) INTO result;
 
     RETURN result;
