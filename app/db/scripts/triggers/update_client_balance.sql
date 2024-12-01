@@ -8,6 +8,8 @@ BEGIN
         UPDATE client
             SET balance = balance - NEW.final_cost
             WHERE client.id = NEW.client_id;
+
+        RAISE NOTICE 'Balance of client "%" has been updated after INSERT.';
     ELSIF TG_OP = 'DELETE' THEN
         left_days_ratio := EXTRACT(DAY FROM (OLD.plan_end_date - CURRENT_DATE)) /
                 EXTRACT(DAY FROM (OLD.plan_end_date - OLD.plan_begin_date));
@@ -15,6 +17,8 @@ BEGIN
         UPDATE client
             SET balance = balance + OLD.final_cost * left_days_ratio
             WHERE client.id = OLD.client_id;
+
+        RAISE NOTICE 'Balance of client "%" has been updated after DELETE.';
     END IF;
     RETURN NULL;
 END;

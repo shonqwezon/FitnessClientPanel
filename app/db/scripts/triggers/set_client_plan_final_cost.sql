@@ -20,6 +20,7 @@ BEGIN
     NEW.final_cost := (plan_record.base_cost + total_service_cost *
         (EXTRACT(EPOCH FROM (plan_record.end_time - plan_record.begin_time)) / 3600)) * plan_record.cost_ratio;
 
+    RAISE NOTICE 'Final cost has been calculated.';
     RETURN NEW;
 END;
 $$ LANGUAGE plpgsql;
