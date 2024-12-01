@@ -1,6 +1,7 @@
 CREATE OR REPLACE PROCEDURE delete_manager(
     fullname VARCHAR(50)
 )
+AS $$
 DECLARE
     result BOOLEAN := FALSE;
 BEGIN

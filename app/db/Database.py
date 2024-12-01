@@ -16,6 +16,7 @@ class Database:
         self.pool = ConnectionManager()
         self.create_tables()
         self.create_triggers()
+        self.create_procedures()
 
     def create_tables(self):
         logger.debug("create_tables")
@@ -41,6 +42,18 @@ class Database:
                 for trigger in triggers:
                     logger.debug(f"Creating {trigger}...")
                     with open(trigger, "r", encoding="utf-8") as sql_file:
+                        cursor.execute(sql_file.read())
+            conn.commit()
+
+    def create_procedures(self):
+        logger.debug("create_procedures")
+        folder_path = Path("app/db/scripts/procedures")
+        procedures = [file for file in list(folder_path.rglob("*")) if file.is_file()]
+        with self.pool.get_connection() as conn:
+            with conn.cursor() as cursor:
+                for proc in procedures:
+                    logger.debug(f"Creating {proc}...")
+                    with open(proc, "r", encoding="utf-8") as sql_file:
                         cursor.execute(sql_file.read())
             conn.commit()
 
