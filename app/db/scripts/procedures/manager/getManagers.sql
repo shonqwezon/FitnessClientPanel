@@ -1,4 +1,4 @@
-CREATE OR REPLACE FUNCTION get_manager_table()
+CREATE OR REPLACE FUNCTION get_managers()
 RETURNS TABLE (fullname VARCHAR(50), assign_date TIMESTAMP, email VARCHAR(50)) AS
 $$
 BEGIN
