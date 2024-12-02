@@ -10,3 +10,16 @@ db_params = {
     "host": getenv("DB_HOST"),
     "port": getenv("DB_PORT"),
 }
+
+db_params_su = {
+    "dbname": getenv("DB_NAME"),
+    "user": "postgres",
+    "password": getenv("DB_PASSWORD_SU"),
+    "host": getenv("DB_HOST"),
+    "port": getenv("DB_PORT"),
+}
+
+
+class DB_CMD:
+    CREATE = "CREATE"
+    DROP = "DROP"
