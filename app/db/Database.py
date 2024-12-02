@@ -141,19 +141,6 @@ class Database:
         self.pool.free()
         self.pool_su.free()
 
-    def is_correct_manager(self, email: str, password_hash: str) -> bool:
-        logger.debug("is_correct_manager")
-        with self.pool.get_connection() as conn:
-            with conn.cursor() as cursor:
-                try:
-                    cursor.callproc("is_correct_manager", [email, password_hash])
-                    return cursor.fetchone()[0]
-                except Exception as e:
-                    logger.error(e.pgerror)
-                    match e.pgcode:
-                        case _:
-                            raise UnknownError()
-
     # Client
 
     def add_client(self, fullname: str):
@@ -234,6 +221,19 @@ class Database:
                             raise UnknownError()
 
     # Manager
+
+    def is_correct_manager(self, email: str, password_hash: str) -> bool:
+        logger.debug("is_correct_manager")
+        with self.pool.get_connection() as conn:
+            with conn.cursor() as cursor:
+                try:
+                    cursor.callproc("is_correct_manager", [email, password_hash])
+                    return cursor.fetchone()[0]
+                except Exception as e:
+                    logger.error(e.pgerror)
+                    match e.pgcode:
+                        case _:
+                            raise UnknownError()
 
     def add_manager(self, fullname: str, email: str, password_hash: str, sportcenter_id: int):
         logger.debug("add_manager")
