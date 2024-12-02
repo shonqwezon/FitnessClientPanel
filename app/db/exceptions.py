@@ -6,6 +6,7 @@ class PgError:
     CHECK = "23514"
     CONVERT = "22P02"
     RAISE = "P0001"
+    NOQUERY = "23502"
 
 
 class TooLongError(Exception):

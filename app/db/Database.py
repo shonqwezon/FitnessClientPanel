@@ -1,4 +1,4 @@
-from datetime import time
+from datetime import date, time
 from os import getenv
 from pathlib import Path
 
@@ -138,6 +138,48 @@ class Database:
                             raise TooLongError("Слишком длинное ФИО")
                         case PgError.UNIQUE:
                             raise UniqueError("Такое ФИО уже было зарегистрировано")
+                        case _:
+                            raise UnknownError()
+
+    def update_balance(self, client_id: int, new_balance: int):
+        logger.debug("update_balance")
+        with self.pool.get_connection() as conn:
+            with conn.cursor() as cursor:
+                try:
+                    cursor.execute("call update_client_balance(%s, %s)", (client_id, new_balance))
+                except Exception as e:
+                    logger.error(e.pgerror)
+                    match e.pgcode:
+                        case PgError.NOQUERY | PgError.RAISE:
+                            raise FKError(
+                                "Указанного клиента или спортивного центра не существует"
+                            )
+                        case PgError.CONVERT:
+                            raise ConvertError("Неверный формат данных (времени или числа)")
+                        case PgError.CHECK:
+                            raise CheckError("Баланс не может быть отрицательным")
+                        case PgError.NUMERIC:
+                            raise NumericError("Ожидался new_balance с точностью 8, порядка 2")
+                        case _:
+                            raise UnknownError()
+
+    def set_client_plan(self, client_id: int, plan_id: int, plan_end: date):
+        logger.debug("set_client_plan")
+        with self.pool.get_connection() as conn:
+            with conn.cursor() as cursor:
+                try:
+                    cursor.execute("call set_plan(%s, %s, %s)", (client_id, plan_id, plan_end))
+                except Exception as e:
+                    logger.error(e.pgerror)
+                    match e.pgcode:
+                        case PgError.NOQUERY | PgError.FK:
+                            raise FKError(
+                                "Указанного клиента или спортивного центра не существует"
+                            )
+                        case PgError.CHECK:
+                            raise CheckError(
+                                "У клиента недостаточно средств или некорректный plan_end"
+                            )
                         case _:
                             raise UnknownError()
 
