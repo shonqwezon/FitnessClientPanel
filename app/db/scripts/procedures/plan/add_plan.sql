@@ -1,7 +1,8 @@
-CREATE OR REPLACE PROCEDURE add_plan(in_base_cost NUMERIC(8, 2),
+CREATE OR REPLACE PROCEDURE app.add_plan(in_base_cost NUMERIC(8, 2),
                                         in_begin_time TIME,
                                         in_end_time TIME,
                                         in_sportcenter_id INTEGER)
+SECURITY DEFINER
 AS $$
 DECLARE
     new_id INTEGER;

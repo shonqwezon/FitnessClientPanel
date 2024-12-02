@@ -1,4 +1,5 @@
-CREATE OR REPLACE PROCEDURE drop_tables()
+CREATE OR REPLACE PROCEDURE app.drop_tables()
+SECURITY DEFINER
 AS $$
 DECLARE
     table_record RECORD;

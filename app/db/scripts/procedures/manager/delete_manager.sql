@@ -1,6 +1,7 @@
-CREATE OR REPLACE PROCEDURE delete_manager(
+CREATE OR REPLACE PROCEDURE app.delete_manager(
     in_fullname VARCHAR(50)
 )
+SECURITY DEFINER
 AS $$
 DECLARE
     result BOOLEAN := FALSE;

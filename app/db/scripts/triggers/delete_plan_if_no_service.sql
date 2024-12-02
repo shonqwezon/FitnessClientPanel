@@ -1,6 +1,7 @@
 CREATE OR REPLACE FUNCTION delete_plan_if_no_service()
-RETURNS TRIGGER AS
-$$
+RETURNS TRIGGER
+SECURITY DEFINER
+AS $$
 BEGIN
     IF NOT EXISTS (SELECT 1 FROM plan_service WHERE plan_id = OLD.plan_id) THEN
         DELETE FROM plan WHERE id = OLD.plan_id;

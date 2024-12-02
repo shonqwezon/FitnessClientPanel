@@ -1,4 +1,5 @@
-CREATE OR REPLACE PROCEDURE drop_table(table_name TEXT, explicity BOOLEAN DEFAULT TRUE)
+CREATE OR REPLACE PROCEDURE app.drop_table(table_name TEXT, explicity BOOLEAN DEFAULT TRUE)
+SECURITY DEFINER
 AS $$
 BEGIN
     IF explicity THEN

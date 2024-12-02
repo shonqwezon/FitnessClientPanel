@@ -1,8 +1,9 @@
-CREATE OR REPLACE PROCEDURE add_sportcenter(in_name VARCHAR(50),
+CREATE OR REPLACE PROCEDURE app.add_sportcenter(in_name VARCHAR(50),
                                         in_address VARCHAR(50),
                                         in_open_time TIME,
                                         in_close_time TIME,
                                         in_cost_ratio NUMERIC(3,2))
+SECURITY DEFINER
 AS $$
 BEGIN
     INSERT INTO sportcenter (name, address, open_time, close_time, cost_ratio)

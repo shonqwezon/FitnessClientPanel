@@ -1,5 +1,6 @@
-CREATE OR REPLACE PROCEDURE add_service(in_description TEXT,
+CREATE OR REPLACE PROCEDURE app.add_service(in_description TEXT,
                                         in_cost NUMERIC(5, 2))
+SECURITY DEFINER
 AS $$
 BEGIN
     INSERT INTO service (description, cost)

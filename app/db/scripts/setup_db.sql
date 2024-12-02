@@ -1,5 +1,5 @@
 CREATE SCHEMA IF NOT EXISTS app;
 CREATE USER {user} WITH PASSWORD '{password}';
-REVOKE ALL ON DATABASE {db} FROM {user};
 REVOKE ALL ON SCHEMA public FROM {user};
-GRANT EXECUTE ON ALL FUNCTIONS IN SCHEMA app TO {user};
+ALTER USER {user} SET search_path TO app, public;
+GRANT USAGE ON SCHEMA app TO {user};

@@ -1,8 +1,10 @@
-CREATE OR REPLACE FUNCTION is_correct_manager(
+CREATE OR REPLACE FUNCTION app.is_correct_manager(
     in_email VARCHAR(50),
     in_password_hash VARCHAR(64)
 )
-RETURNS BOOLEAN AS $$
+RETURNS BOOLEAN
+SECURITY DEFINER
+AS $$
 DECLARE
     result BOOLEAN;
 BEGIN

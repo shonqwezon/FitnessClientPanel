@@ -36,7 +36,6 @@ class Database:
                     with open("app/db/scripts/setup_db.sql", "r", encoding="utf-8") as sql_file:
                         cursor.execute(
                             sql_file.read().format(
-                                db=db_params["dbname"],
                                 user=db_params["user"],
                                 password=db_params["password"],
                             )

@@ -1,6 +1,7 @@
-CREATE OR REPLACE PROCEDURE delete_service(
+CREATE OR REPLACE PROCEDURE app.delete_service(
     in_id INTEGER
 )
+SECURITY DEFINER
 AS $$
 DECLARE
     result TEXT;

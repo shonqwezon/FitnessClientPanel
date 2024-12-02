@@ -1,6 +1,7 @@
 CREATE OR REPLACE FUNCTION set_plan_final_cost()
-RETURNS TRIGGER AS
-$$
+RETURNS TRIGGER
+SECURITY DEFINER
+AS $$
 DECLARE
     plan_record RECORD;
     total_service_cost NUMERIC(5, 2);

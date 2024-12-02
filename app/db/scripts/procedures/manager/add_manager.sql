@@ -1,7 +1,8 @@
-CREATE OR REPLACE PROCEDURE add_manager(in_fullname VARCHAR(50),
+CREATE OR REPLACE PROCEDURE app.add_manager(in_fullname VARCHAR(50),
                                         in_email VARCHAR(50),
                                         in_password_hash VARCHAR(64),
                                         in_sportcenter_id INTEGER)
+SECURITY DEFINER
 AS $$
 BEGIN
     INSERT INTO manager (fullname, email, password_hash, sportcenter_id)
