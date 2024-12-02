@@ -1,6 +1,6 @@
 CREATE OR REPLACE FUNCTION app.get_plan(service_ids INTEGER[])
 RETURNS TABLE (id INTEGER,
-                final_cost NUMERIC(8, 2),
+                cost_per_month NUMERIC(8, 2),
                 begin_time TIME,
                 end_time TIME,
                 body TEXT[],
@@ -10,7 +10,7 @@ SECURITY DEFINER
 AS $$
 BEGIN
     RETURN QUERY SELECT p.id,
-                        app.calculate_plan_cost(p.id) AS final_cost,
+                        app.calculate_plan_cost(p.id) * 30 AS cost_per_month,
                         p.begin_time,
                         p.end_time,
                         array_agg(s.description) AS body,
