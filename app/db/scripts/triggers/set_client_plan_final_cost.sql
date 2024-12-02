@@ -3,7 +3,7 @@ RETURNS TRIGGER
 SECURITY DEFINER
 AS $$
 BEGIN
-    NEW.final_cost := app.calculate_plan_cost(NEW.plan_id);
+    NEW.final_cost := app.calculate_plan_cost(NEW.plan_id) * (NEW.plan_end_date - NEW.plan_begin_date);
     RAISE NOTICE 'Final cost has been updated.';
     RETURN NEW;
 END;
