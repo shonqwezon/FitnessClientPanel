@@ -12,6 +12,7 @@ from .connectionManager import ConnectionManager
 from .exceptions import (
     CheckError,
     ConvertError,
+    EntityError,
     FKError,
     NumericError,
     PgError,
@@ -35,6 +36,23 @@ class Database:
     def drop_db(self):
         self.close()
         self.db(DB_CMD.DROP)
+
+    def drop_table(self, table_name: str = None):
+        logger.debug(f"drop_table {table_name}")
+        with self.pool_su.get_connection() as conn:
+            conn.autocommit = True
+            with conn.cursor() as cursor:
+                try:
+                    if table_name:
+                        cursor.execute("call app.drop_table(%s)", (table_name,))
+                    else:
+                        cursor.execute("call app.drop_tables()")
+                except Exception as e:
+                    logger.error(e.pgerror)
+                    if e.pgcode == PgError.NOENTITY:
+                        raise EntityError(f"Таблицы {table_name} не существует")
+                    else:
+                        raise UnknownError()
 
     def create_db(self):
         self.db(DB_CMD.CREATE)

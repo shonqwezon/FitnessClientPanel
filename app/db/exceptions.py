@@ -7,6 +7,7 @@ class PgError:
     CONVERT = "22P02"
     RAISE = "P0001"
     NOQUERY = "23502"
+    NOENTITY = "42P01"
 
 
 class TooLongError(Exception):
@@ -34,4 +35,8 @@ class ConvertError(Exception):
 
 
 class UnknownError(Exception):
+    pass
+
+
+class EntityError(Exception):
     pass
