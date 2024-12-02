@@ -10,7 +10,9 @@ BEGIN
     DELETE FROM client_plan
     WHERE client_id = in_client_id AND plan_id = in_plan_id
     RETURNING plan_end_date INTO result;
-
+    IF NOT FOUND THEN
+        RAISE EXCEPTION 'Client "%" or Plan "%" does not exist', in_client_id, in_plan_id;
+    END IF;
     RETURN result;
 END;
 $$ LANGUAGE plpgsql;

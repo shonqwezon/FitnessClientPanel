@@ -183,6 +183,25 @@ class Database:
                         case _:
                             raise UnknownError()
 
+    def delete_client_plan(self, client_id: int, plan_id: int) -> date:
+        logger.debug("delete_client_plan")
+        with self.pool.get_connection() as conn:
+            with conn.cursor() as cursor:
+                try:
+                    cursor.callproc("delete_client_plan", [client_id, plan_id])
+                    return cursor.fetchone()[0]
+                except Exception as e:
+                    logger.error(e.pgerror)
+                    match e.pgcode:
+                        case PgError.RAISE:
+                            raise FKError("Указанного клиента или плана не существует")
+                        case PgError.CONVERT:
+                            raise ConvertError(
+                                "Неверный формат client_id или plan_id, ожидалось число"
+                            )
+                        case _:
+                            raise UnknownError()
+
     # Manager
 
     def add_manager(self, fullname: str, email: str, password_hash: str, sportcenter_id: int):
