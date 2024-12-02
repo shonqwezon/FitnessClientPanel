@@ -12,9 +12,9 @@ BEGIN
 
         RAISE NOTICE 'Balance of client "%" has been updated after INSERT.', NEW.client_id;
     ELSIF TG_OP = 'DELETE' THEN
-        left_days_ratio := (OLD.plan_end_date - CURRENT_DATE) /
+        left_days_ratio := (OLD.plan_end_date - CURRENT_DATE)::NUMERIC /
                 (OLD.plan_end_date - OLD.plan_begin_date);
-
+        RAISE NOTICE '% / %', OLD.plan_end_date - CURRENT_DATE, OLD.plan_end_date - OLD.plan_begin_date;
         UPDATE client
             SET balance = balance + OLD.final_cost * left_days_ratio
             WHERE client.id = OLD.client_id;
