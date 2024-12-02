@@ -3,17 +3,11 @@ CREATE OR REPLACE PROCEDURE app.delete_plan(
 )
 SECURITY DEFINER
 AS $$
-DECLARE
-    result TEXT;
 BEGIN
-    DELETE FROM plan
-    WHERE id = in_id
-    RETURNING create_date INTO result;
+    DELETE FROM plan WHERE id = in_id;
 
-    IF result IS NOT NULL THEN
-        RAISE NOTICE 'Plan "%" ("%") has been deleted successfully.', in_id, result;
-    ELSE
-        RAISE NOTICE 'Plan "%" does not exist.', in_id;
+    IF NOT FOUND THEN
+        RAISE EXCEPTION 'Plan "%" does not exist', in_id;
     END IF;
 END;
 $$ LANGUAGE plpgsql;

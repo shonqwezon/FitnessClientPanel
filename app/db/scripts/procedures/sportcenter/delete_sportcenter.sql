@@ -3,17 +3,11 @@ CREATE OR REPLACE PROCEDURE app.delete_sportcenter(
 )
 SECURITY DEFINER
 AS $$
-DECLARE
-    result TEXT;
 BEGIN
-    DELETE FROM sportcenter
-    WHERE id = in_id
-    RETURNING name INTO result;
+    DELETE FROM sportcenter WHERE id = in_id;
 
-    IF result IS NOT NULL THEN
-        RAISE NOTICE 'Sportcenter "%" ("%") has been deleted successfully.', in_id, result;
-    ELSE
-        RAISE NOTICE 'Sportcenter "%" does not exist.', in_id;
+    IF NOT FOUND THEN
+        RAISE EXCEPTION 'Sportcenter "%" does not exist', in_id;
     END IF;
 END;
 $$ LANGUAGE plpgsql;

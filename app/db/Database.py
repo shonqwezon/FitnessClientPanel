@@ -141,6 +141,19 @@ class Database:
         self.pool.free()
         self.pool_su.free()
 
+    def is_correct_manager(self, email: str, password_hash: str) -> bool:
+        logger.debug("is_correct_manager")
+        with self.pool.get_connection() as conn:
+            with conn.cursor() as cursor:
+                try:
+                    cursor.callproc("is_correct_manager", [email, password_hash])
+                    return cursor.fetchone()[0]
+                except Exception as e:
+                    logger.error(e.pgerror)
+                    match e.pgcode:
+                        case _:
+                            raise UnknownError()
+
     # Client
 
     def add_client(self, fullname: str):
@@ -252,6 +265,22 @@ class Database:
                         case _:
                             raise UnknownError()
 
+    def delete_manager(self, fullname: str):
+        logger.debug("delete_manager")
+        with self.pool.get_connection() as conn:
+            with conn.cursor() as cursor:
+                try:
+                    cursor.execute("call delete_manager(%s)", (fullname,))
+                except Exception as e:
+                    logger.error(e.pgerror)
+                    match e.pgcode:
+                        case PgError.RAISE:
+                            raise FKError("Указанного менеджера не существует")
+                        case PgError.NOPROC:
+                            raise ConvertError("Неверный формат fullname, ожидалась строка")
+                        case _:
+                            raise UnknownError()
+
     # Sportcenter
 
     def add_sportcenter(
@@ -281,6 +310,22 @@ class Database:
                         case _:
                             raise UnknownError()
 
+    def delete_sportcenter(self, sportcenter_id: int):
+        logger.debug("delete_sportcenter")
+        with self.pool.get_connection() as conn:
+            with conn.cursor() as cursor:
+                try:
+                    cursor.execute("call delete_sportcenter(%s)", (sportcenter_id,))
+                except Exception as e:
+                    logger.error(e.pgerror)
+                    match e.pgcode:
+                        case PgError.RAISE:
+                            raise FKError("Указанного спортивного центра не существует")
+                        case PgError.CONVERT:
+                            raise ConvertError("Неверный формат sportcenter_id, ожидалось число")
+                        case _:
+                            raise UnknownError()
+
     # Service
 
     def add_service(self, description: str, cost: int):
@@ -302,6 +347,22 @@ class Database:
                             raise CheckError("Нарушено ограничение таблицы")
                         case PgError.CONVERT:
                             raise ConvertError("Неверный формат cost, ожидалось число")
+                        case _:
+                            raise UnknownError()
+
+    def delete_service(self, service_id: int):
+        logger.debug("delete_service")
+        with self.pool.get_connection() as conn:
+            with conn.cursor() as cursor:
+                try:
+                    cursor.execute("call delete_service(%s)", (service_id,))
+                except Exception as e:
+                    logger.error(e.pgerror)
+                    match e.pgcode:
+                        case PgError.RAISE:
+                            raise FKError("Указанной услуги не существует")
+                        case PgError.CONVERT:
+                            raise ConvertError("Неверный формат service_id, ожидалось число")
                         case _:
                             raise UnknownError()
 
@@ -328,5 +389,21 @@ class Database:
                                 "Временные рамки плана\
 не должны выходить за рабочие часы спортивного центра"
                             )
+                        case _:
+                            raise UnknownError()
+
+    def delete_plan(self, plan_id: int):
+        logger.debug("delete_plan")
+        with self.pool.get_connection() as conn:
+            with conn.cursor() as cursor:
+                try:
+                    cursor.execute("call delete_plan(%s)", (plan_id,))
+                except Exception as e:
+                    logger.error(e.pgerror)
+                    match e.pgcode:
+                        case PgError.RAISE:
+                            raise FKError("Указанного плана не существует")
+                        case PgError.CONVERT:
+                            raise ConvertError("Неверный формат plan_id, ожидалось число")
                         case _:
                             raise UnknownError()

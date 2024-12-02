@@ -3,17 +3,11 @@ CREATE OR REPLACE PROCEDURE app.delete_service(
 )
 SECURITY DEFINER
 AS $$
-DECLARE
-    result TEXT;
 BEGIN
-    DELETE FROM service
-    WHERE id = in_id
-    RETURNING description INTO result;
+    DELETE FROM service WHERE id = in_id;
 
-    IF result IS NOT NULL THEN
-        RAISE NOTICE 'Service "%" ("%") has been deleted successfully.', in_id, result;
-    ELSE
-        RAISE NOTICE 'Service "%" does not exist.', in_id;
+    IF NOT FOUND THEN
+        RAISE EXCEPTION 'Service "%" does not exist', in_id;
     END IF;
 END;
 $$ LANGUAGE plpgsql;

@@ -3,17 +3,11 @@ CREATE OR REPLACE PROCEDURE app.delete_manager(
 )
 SECURITY DEFINER
 AS $$
-DECLARE
-    result BOOLEAN := FALSE;
 BEGIN
-    DELETE FROM manager
-    WHERE fullname = in_fullname
-    RETURNING TRUE INTO result;
+    DELETE FROM manager WHERE fullname = in_fullname;
 
-    IF result THEN
-        RAISE NOTICE 'Manager "%" has been deleted successfully.', in_fullname;
-    ELSE
-        RAISE NOTICE 'Manager "%" does not exist.', in_fullname;
+    IF NOT FOUND THEN
+        RAISE EXCEPTION 'Manager "%" does not exist', in_fullname;
     END IF;
 END;
 $$ LANGUAGE plpgsql;
