@@ -1,3 +1,4 @@
+from datetime import time
 from os import getenv
 from pathlib import Path
 
@@ -8,6 +9,16 @@ from app import setup_logger
 
 from .config import DB_CMD, db_params, db_params_su
 from .connectionManager import ConnectionManager
+from .exceptions import (
+    CheckError,
+    ConvertError,
+    FKError,
+    NumericError,
+    PgError,
+    TooLongError,
+    UniqueError,
+    UnknownError,
+)
 
 logger = setup_logger(__name__)
 
@@ -19,8 +30,7 @@ class Database:
         self.create_tables()
         self.create_triggers()
         self.create_procedures()
-        self.pool = ConnectionManager(db_params)
-        # self.drop_db()
+        self.pool = ConnectionManager(db_params, True)
 
     def drop_db(self):
         self.close()
@@ -112,3 +122,132 @@ class Database:
         logger.info("Close db")
         self.pool.free()
         self.pool_su.free()
+
+    # Client
+
+    def add_client(self, fullname: str):
+        logger.debug("add_client")
+        with self.pool.get_connection() as conn:
+            with conn.cursor() as cursor:
+                try:
+                    cursor.execute("call add_client(%s)", (fullname,))
+                except Exception as e:
+                    logger.error(e.pgerror)
+                    match e.pgcode:
+                        case PgError.TOO_LONG:
+                            raise TooLongError("Слишком длинное ФИО")
+                        case PgError.UNIQUE:
+                            raise UniqueError("Такое ФИО уже было зарегистрировано")
+                        case _:
+                            raise UnknownError()
+
+    # Manager
+
+    def add_manager(self, fullname: str, email: str, password_hash: str, sportcenter_id: int):
+        logger.debug("add_manager")
+        with self.pool.get_connection() as conn:
+            with conn.cursor() as cursor:
+                try:
+                    cursor.execute(
+                        "call add_manager(%s, %s, %s, %s)",
+                        (
+                            fullname,
+                            email,
+                            password_hash,
+                            sportcenter_id,
+                        ),
+                    )
+                except Exception as e:
+                    logger.error(e.pgerror)
+                    match e.pgcode:
+                        case PgError.TOO_LONG:
+                            raise TooLongError("Слишком длинное ФИО")
+                        case PgError.UNIQUE:
+                            raise UniqueError("Такое ФИО уже было зарегистрировано")
+                        case PgError.FK:
+                            raise FKError(
+                                f"Спортивного центра с id={sportcenter_id} не существует"
+                            )
+                        case PgError.CONVERT:
+                            raise ConvertError("Неверный формат sportcenter_id, ожидалось число")
+                        case _:
+                            raise UnknownError()
+
+    # Sportcenter
+
+    def add_sportcenter(
+        self, name: str, address: str, open_time: time, close_time: time, cost_ratio: float
+    ):
+        logger.debug("add_client")
+        with self.pool.get_connection() as conn:
+            with conn.cursor() as cursor:
+                try:
+                    cursor.execute(
+                        "call add_sportcenter(%s, %s, %s, %s, %s)",
+                        (name, address, open_time, close_time, cost_ratio),
+                    )
+                except Exception as e:
+                    logger.error(e.pgerror)
+                    match e.pgcode:
+                        case PgError.TOO_LONG:
+                            raise TooLongError("Слишком длинное название центра или его адреса")
+                        case PgError.UNIQUE:
+                            raise UniqueError(f"Спортивный с name={name} центр уже сущуствует")
+                        case PgError.NUMERIC:
+                            raise NumericError("Ожидалось cost_ratio с точностью 3, порядка 2")
+                        case PgError.CHECK:
+                            raise CheckError("Нарушено ограничение таблицы")
+                        case PgError.CONVERT:
+                            raise ConvertError("Неверный формат данных (времени или числа)")
+                        case _:
+                            raise UnknownError()
+
+    # Service
+
+    def add_service(self, description: str, cost: int):
+        logger.debug("add_service")
+        with self.pool.get_connection() as conn:
+            with conn.cursor() as cursor:
+                try:
+                    cursor.execute("call add_service(%s, %s)", (description, cost))
+                except Exception as e:
+                    logger.error(e.pgerror)
+                    match e.pgcode:
+                        case PgError.TOO_LONG:
+                            raise TooLongError("Слишком длинное название центра или его адреса")
+                        case PgError.UNIQUE:
+                            raise UniqueError(f"Услуга с description={description} уже сущуствует")
+                        case PgError.NUMERIC:
+                            raise NumericError("Ожидалось cost_ratio с точностью 5, порядка 2")
+                        case PgError.CHECK:
+                            raise CheckError("Нарушено ограничение таблицы")
+                        case PgError.CONVERT:
+                            raise ConvertError("Неверный формат cost, ожидалось число")
+                        case _:
+                            raise UnknownError()
+
+    # Plan
+
+    def add_plan(self, base_cost: int, begin_time: time, end_time: time, sportcenter_id: int):
+        logger.debug("add_plan")
+        with self.pool.get_connection() as conn:
+            with conn.cursor() as cursor:
+                try:
+                    cursor.execute(
+                        "call add_plan(%s, %s, %s, %s)",
+                        (base_cost, begin_time, end_time, sportcenter_id),
+                    )
+                except Exception as e:
+                    logger.error(e.pgerror)
+                    match e.pgcode:
+                        case PgError.CHECK:
+                            raise CheckError("Нарушено ограничение таблицы")
+                        case PgError.CONVERT:
+                            raise ConvertError("Неверный формат данных (времени или id)")
+                        case PgError.RAISE:
+                            raise CheckError(
+                                "Временные рамки плана\
+не должны выходить за рабочие часы спортивного центра"
+                            )
+                        case _:
+                            raise UnknownError()
