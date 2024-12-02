@@ -1,4 +1,4 @@
-CREATE OR REPLACE FUNCTION app.get_plans(service_ids INTEGER[])
+CREATE OR REPLACE FUNCTION app.get_plan(service_ids INTEGER[])
 RETURNS TABLE (id INTEGER,
                 final_cost NUMERIC(8, 2),
                 begin_time TIME,

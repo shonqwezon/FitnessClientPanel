@@ -1,4 +1,4 @@
-CREATE OR REPLACE FUNCTION app.get_plans(in_sportcenter_id INTEGER)
+CREATE OR REPLACE FUNCTION app.get_plan(in_sportcenter_id INTEGER)
 RETURNS TABLE (id INTEGER,
                 final_cost NUMERIC(8, 2),
                 begin_time TIME,

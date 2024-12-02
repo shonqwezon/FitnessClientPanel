@@ -1,4 +1,4 @@
-CREATE OR REPLACE FUNCTION app.get_services()
+CREATE OR REPLACE FUNCTION app.get_service()
 RETURNS TABLE (id INTEGER, description TEXT, cost NUMERIC(5, 2))
 SECURITY DEFINER
 AS $$
