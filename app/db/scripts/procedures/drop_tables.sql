@@ -8,7 +8,7 @@ BEGIN
         FROM pg_tables
         WHERE schemaname = 'public'
     LOOP
-        CALL drop_table(table_record.tablename);
+        CALL drop_table(table_record.tablename, FALSE);
     END LOOP;
 
     RAISE NOTICE 'All tables have been dropped.';
