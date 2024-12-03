@@ -8,5 +8,9 @@ AS $$
 BEGIN
     RETURN QUERY SELECT s.id, s.name, s.address FROM sportcenter AS s
         WHERE (sportcenter_id IS NULL OR s.id = sportcenter_id);
+
+    IF (sportcenter_id IS NOT NULL) AND (NOT FOUND) THEN
+        RAISE EXCEPTION 'Sportcenter "%" does not exist', sportcenter_id;
+    END IF;
 END;
 $$ LANGUAGE plpgsql;

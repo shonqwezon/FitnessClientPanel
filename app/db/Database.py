@@ -326,6 +326,28 @@ class Database:
                         case _:
                             raise UnknownError()
 
+    def get_sportcenter(self, sportcenter_id: int = None):
+        logger.debug("get_sportcenter")
+        with self.pool.get_connection() as conn:
+            with conn.cursor() as cursor:
+                try:
+                    if sportcenter_id:
+                        cursor.callproc("get_sportcenter", [sportcenter_id])
+                        res = cursor.fetchone()
+                    else:
+                        cursor.callproc("get_sportcenter")
+                        res = cursor.fetchall()
+                    return res
+                except Exception as e:
+                    logger.error(e.pgerror)
+                    match e.pgcode:
+                        case PgError.RAISE:
+                            raise FKError("Указанного спортивного центра не существует")
+                        case PgError.CONVERT:
+                            raise ConvertError("Неверный формат sportcenter_id, ожидалось число")
+                        case _:
+                            raise UnknownError()
+
     # Service
 
     def add_service(self, description: str, cost: int):
