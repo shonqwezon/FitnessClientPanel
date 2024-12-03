@@ -1,9 +1,11 @@
 from datetime import date, time
 from os import getenv
 from pathlib import Path
+from typing import Any
 
 import psycopg2
 from psycopg2 import sql
+from psycopg2.extensions import connection
 
 from app import setup_logger
 
@@ -78,6 +80,7 @@ class Database:
             sql.SQL(cmd), sql.Identifier(db_params["dbname"])
         )
         logger.debug(query)
+        conn: connection = None
         try:
             t_db_params_su = db_params_su.copy()
             t_db_params_su["dbname"] = "postgres"
@@ -131,7 +134,7 @@ class Database:
                         cursor.execute(sql_file.read())
             conn.commit()
 
-    def is_admin(login: str, password: str):
+    def is_admin(self, login: str, password: str) -> bool:
         return (
             getenv("ADMIN_LOGIN") == login.strip() and getenv("ADMIN_PASSWORD") == password.strip()
         )
@@ -141,15 +144,15 @@ class Database:
         self.pool.free()
         self.pool_su.free()
 
-    def get_table(self, table_name: DbTable, id: int = None):
+    def get_table(self, table_name: DbTable, id_parameter: Any = None):
         logger.debug(f"get_table {table_name}")
         with self.pool.get_connection() as conn:
             with conn.cursor() as cursor:
                 try:
                     req = f"get_{table_name}"
-                    if id:
-                        cursor.callproc(req, [id])
-                        res = cursor.fetchone()
+                    if id_parameter:
+                        cursor.callproc(req, [id_parameter])
+                        res = cursor.fetchall()
                     else:
                         cursor.callproc(req)
                         res = cursor.fetchall()
@@ -309,7 +312,7 @@ class Database:
     def add_sportcenter(
         self, name: str, address: str, open_time: time, close_time: time, cost_ratio: float
     ):
-        logger.debug("add_client")
+        logger.debug("add_sportcenter")
         with self.pool.get_connection() as conn:
             with conn.cursor() as cursor:
                 try:

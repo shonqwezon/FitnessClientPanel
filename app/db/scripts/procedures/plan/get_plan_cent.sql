@@ -17,5 +17,8 @@ BEGIN
                 JOIN service s ON s.id = ps.service_id
                 WHERE p.sportcenter_id = in_sportcenter_id
                 GROUP BY p.id;
+    IF NOT FOUND THEN
+        RAISE EXCEPTION 'Plans of sportcenter "%" for manager do not exist', in_sportcenter_id;
+    END IF;
 END;
 $$ LANGUAGE plpgsql;

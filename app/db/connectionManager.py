@@ -7,6 +7,7 @@ from psycopg2.extensions import connection
 from app import setup_logger
 
 from . import config as cfg
+from .exceptions import DbError
 
 logger = setup_logger(__name__)
 
@@ -28,6 +29,8 @@ class ConnectionManager:
             conn = self.pool.getconn()
             conn.autocommit = self.autocommit
             yield conn
+        except DbError:
+            raise
         except Exception as e:
             logger.error(f"Error can't get connection:\n{e}")
             raise
