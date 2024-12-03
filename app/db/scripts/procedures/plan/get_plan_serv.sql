@@ -1,4 +1,4 @@
-CREATE OR REPLACE FUNCTION app.get_plan(service_ids INTEGER[])
+CREATE OR REPLACE FUNCTION app.get_plan(service_ids INTEGER[] DEFAULT '{}')
 RETURNS TABLE (id INTEGER,
                 cost_per_month NUMERIC(8, 2),
                 begin_time TIME,
@@ -21,5 +21,8 @@ BEGIN
                 JOIN service s ON s.id = ps.service_id
                 WHERE ps.service_id = ANY(service_ids)
                 GROUP BY p.id;
+    IF NOT FOUND THEN
+        RAISE EXCEPTION 'Plans with services_ids "%" for manager do not exist', service_ids;
+    END IF;
 END;
 $$ LANGUAGE plpgsql;
