@@ -1,5 +1,5 @@
 import tkinter as tk
-from tkinter import messagebox
+from tkinter import messagebox, ttk
 
 
 class MainApplication(tk.Tk):
@@ -93,7 +93,9 @@ class MainApplication(tk.Tk):
         tk.Button(self, text="Настройка тарифов", width=30, command=self.admin_plans_menu).pack(
             pady=5
         )
-        tk.Button(self, text="Просмотр", width=30).pack(pady=5)
+        tk.Button(self, text="Просмотр", width=30, command=self.admin_view_menu).pack(pady=5)
+        tk.Button(self, text="Удаление", width=30, command=self.admin_delete_menu).pack(pady=5)
+
         tk.Button(self, text="Выйти", width=30, command=self.show_login_screen).pack(pady=20)
 
     # Управление менеджерами
@@ -286,6 +288,7 @@ class MainApplication(tk.Tk):
         tk.Button(self, text="Назад", width=30, command=self.admin_managers_menu).pack(pady=10)
 
     # Управление услугами
+
     def admin_services_menu(self):
         self.clear_screen()
 
@@ -360,6 +363,8 @@ class MainApplication(tk.Tk):
 
         # Кнопка "Назад"
         tk.Button(self, text="Назад", width=30, command=self.admin_services_menu).pack(pady=10)
+
+    # Управление тарифами
 
     def admin_plans_menu(self):
         """
@@ -562,6 +567,185 @@ class MainApplication(tk.Tk):
 
         # Кнопка "Назад"
         tk.Button(self, text="Назад", width=30, command=self.admin_plans_delete).pack(pady=10)
+
+    # Просмотр
+
+    def delete_table_from_db(self, table_name):
+        """
+        Удаляет таблицу из базы данных.
+        """
+        # Здесь будет логика удаления таблицы из БД
+        messagebox.showinfo("Удаление", f"Таблица '{table_name}' успешно удалена.")
+        pass
+
+    def admin_view_menu(self):
+        """Меню просмотра данных."""
+        self.clear_screen()
+
+        tk.Label(self, text="Просмотр", font=("Arial", 24)).pack(pady=20)
+
+        tk.Button(self, text="Менеджеры", width=30, command=self.admin_view_managers).pack(pady=5)
+        tk.Button(self, text="Залы", width=30, command=self.admin_view_halls).pack(pady=5)
+        tk.Button(self, text="Услуги", width=30, command=self.admin_view_services).pack(pady=5)
+        tk.Button(self, text="Клиенты", width=30, command=self.admin_view_clients).pack(pady=5)
+
+        tk.Button(self, text="Назад", width=30, command=self.show_admin_menu).pack(pady=5)
+
+    def create_table(self, columns, data):
+        """
+        Создает таблицу Treeview с прокруткой.
+
+        :param columns: Список столбцов таблицы.
+        :param data: Данные для заполнения таблицы (список словарей).
+        :return: Объект Treeview.
+        """
+        container = ttk.Frame(self)
+        container.pack(fill=tk.BOTH, expand=True, pady=10)
+
+        # Создаем Treeview
+        tree = ttk.Treeview(container, columns=columns, show="headings", height=15)
+        tree.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
+
+        # Прокрутка
+        scrollbar = ttk.Scrollbar(container, orient=tk.VERTICAL, command=tree.yview)
+        scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
+        tree.configure(yscrollcommand=scrollbar.set)
+
+        # Настраиваем столбцы
+        for col in columns:
+            tree.heading(col, text=col)
+            tree.column(col, width=200, anchor=tk.W)
+
+        # Заполняем таблицу
+        for row in data:
+            tree.insert("", tk.END, values=[row[col] for col in columns])
+
+        return tree
+
+    def admin_view_managers(self):
+        """Просмотр списка менеджеров."""
+        self.clear_screen()
+
+        tk.Label(self, text="Менеджеры", font=("Arial", 24)).pack(pady=20)
+
+        # Пример данных
+        managers = [
+            {"ФИО": "Иванов Иван Иванович", "Email": "ivanov@example.com"},
+            {"ФИО": "Петров Петр Петрович", "Email": "petrov@example.com"},
+        ]
+
+        # Создаем таблицу
+        columns = ["ФИО", "Email"]
+        self.create_table(columns, managers)
+
+        # Кнопка "Удалить таблицу"
+        tk.Button(
+            self,
+            text="Удалить таблицу",
+            width=30,
+            command=lambda: self.delete_table_from_db("managers"),
+        ).pack(pady=10)
+
+        # Кнопка "Назад"
+        tk.Button(self, text="Назад", width=30, command=self.admin_view_menu).pack(pady=10)
+
+    def admin_view_halls(self):
+        """Просмотр списка залов."""
+        self.clear_screen()
+
+        tk.Label(self, text="Залы", font=("Arial", 24)).pack(pady=20)
+
+        # Пример данных
+        halls = [
+            {"Зал": "Зал 1", "Адрес": "ул. Ленина, 1"},
+            {"Зал": "Зал 2", "Адрес": "ул. Советская, 10"},
+        ]
+
+        # Создаем таблицу
+        columns = ["Зал", "Адрес"]
+        self.create_table(columns, halls)
+
+        # Кнопка "Удалить таблицу"
+        tk.Button(
+            self,
+            text="Удалить таблицу",
+            width=30,
+            command=lambda: self.delete_table_from_db("halls"),
+        ).pack(pady=10)
+
+        # Кнопка "Назад"
+        tk.Button(self, text="Назад", width=30, command=self.admin_view_menu).pack(pady=10)
+
+    def admin_view_services(self):
+        """Просмотр списка услуг."""
+        self.clear_screen()
+
+        tk.Label(self, text="Услуги", font=("Arial", 24)).pack(pady=20)
+
+        # Пример данных
+        services = [
+            {"Услуга": "Йога", "Цена": "500 руб"},
+            {"Услуга": "Тренажерный зал", "Цена": "1000 руб"},
+        ]
+
+        # Создаем таблицу
+        columns = ["Услуга", "Цена"]
+        self.create_table(columns, services)
+
+        # Кнопка "Удалить таблицу"
+        tk.Button(
+            self,
+            text="Удалить таблицу",
+            width=30,
+            command=lambda: self.delete_table_from_db("services"),
+        ).pack(pady=10)
+
+        # Кнопка "Назад"
+        tk.Button(self, text="Назад", width=30, command=self.admin_view_menu).pack(pady=10)
+
+    def admin_view_clients(self):
+        """Просмотр списка клиентов."""
+        self.clear_screen()
+
+        tk.Label(self, text="Клиенты", font=("Arial", 24)).pack(pady=20)
+
+        # Пример данных
+        clients = [
+            {"ФИО": "Сидоров Сидр Сидорович"},
+            {"ФИО": "Александров Александр Александрович"},
+        ]
+
+        # Создаем таблицу
+        columns = ["ФИО"]
+        self.create_table(columns, clients)
+
+        # Кнопка "Удалить таблицу"
+        tk.Button(
+            self,
+            text="Удалить таблицу",
+            width=30,
+            command=lambda: self.delete_table_from_db("clients"),
+        ).pack(pady=10)
+
+        # Кнопка "Назад"
+        tk.Button(self, text="Назад", width=30, command=self.admin_view_menu).pack(pady=10)
+
+    # удаление всего
+
+    def admin_delete_menu(self):
+        self.clear_screen()
+
+        tk.Label(self, text="Удаление", font=("Arial", 24)).pack(pady=20)
+
+        def delete_all_tables():
+            pass
+
+        tk.Button(
+            self, text="Удалить все таблицы", width=30, command=self.admin_view_services
+        ).pack(pady=5)
+        tk.Button(self, text="Удалить БД", width=30, command=self.admin_view_clients).pack(pady=5)
+
+        tk.Button(self, text="Назад", width=30, command=self.show_admin_menu).pack(pady=5)
 
     #
     # ---
