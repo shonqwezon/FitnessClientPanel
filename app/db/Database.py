@@ -394,18 +394,27 @@ class Database:
 
     # Plan
 
-    def add_plan(self, base_cost: int, begin_time: time, end_time: time, sportcenter_id: int):
+    def add_plan(
+        self,
+        base_cost: int,
+        begin_time: time,
+        end_time: time,
+        sportcenter_id: int,
+        service_ids: list[int],
+    ):
         logger.debug("add_plan")
         with self.pool.get_connection() as conn:
             with conn.cursor() as cursor:
                 try:
                     cursor.execute(
-                        "call add_plan(%s, %s, %s, %s)",
-                        (base_cost, begin_time, end_time, sportcenter_id),
+                        "call add_plan(%s, %s, %s, %s, %s)",
+                        (base_cost, begin_time, end_time, sportcenter_id, service_ids),
                     )
                 except Exception as e:
                     logger.error(e.pgerror)
                     match e.pgcode:
+                        case PgError.FK:
+                            raise FKError("Указанные id услуг не существуют")
                         case PgError.CHECK:
                             raise CheckError("Нарушено ограничение таблицы")
                         case PgError.CONVERT:
