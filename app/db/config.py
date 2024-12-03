@@ -1,3 +1,4 @@
+from enum import StrEnum
 from os import getenv
 
 MIN_CONN = 1
@@ -20,6 +21,14 @@ db_params_su = {
 }
 
 
-class DB_CMD:
+class DbTable(StrEnum):
+    MANAGER = "manager"
+    SERVICE = "service"
+    SPORTCENTER = "sportcenter"
+    CLIENT = "client"
+    PLAN = "plan"
+
+
+class DbCmd:
     CREATE = "CREATE"
     DROP = "DROP"

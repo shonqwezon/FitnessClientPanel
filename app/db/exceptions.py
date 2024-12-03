@@ -11,33 +11,37 @@ class PgError:
     NOPROC = "42883"
 
 
-class TooLongError(Exception):
+class DbError(Exception):
     pass
 
 
-class UniqueError(Exception):
+class TooLongError(DbError):
     pass
 
 
-class FKError(Exception):
+class UniqueError(DbError):
     pass
 
 
-class NumericError(Exception):
+class FKError(DbError):
     pass
 
 
-class CheckError(Exception):
+class NumericError(DbError):
     pass
 
 
-class ConvertError(Exception):
+class CheckError(DbError):
     pass
 
 
-class UnknownError(Exception):
+class ConvertError(DbError):
     pass
 
 
-class EntityError(Exception):
+class UnknownError(DbError):
+    pass
+
+
+class EntityError(DbError):
     pass

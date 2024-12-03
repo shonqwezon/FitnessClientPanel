@@ -7,7 +7,7 @@ from psycopg2 import sql
 
 from app import setup_logger
 
-from .config import DB_CMD, db_params, db_params_su
+from .config import DbCmd, DbTable, db_params, db_params_su
 from .connectionManager import ConnectionManager
 from .exceptions import (
     CheckError,
@@ -35,11 +35,11 @@ class Database:
 
     def drop_db(self):
         self.close()
-        self.db(DB_CMD.DROP)
+        self.db(DbCmd.DROP)
 
-    def drop_table(self, table_name: str = None):
+    def drop_table(self, table_name: DbTable = None):
         logger.debug(f"drop_table {table_name}")
-        with self.pool_su.get_connection() as conn:
+        with self.pool.get_connection() as conn:
             conn.autocommit = True
             with conn.cursor() as cursor:
                 try:
@@ -55,7 +55,7 @@ class Database:
                         raise UnknownError()
 
     def create_db(self):
-        self.db(DB_CMD.CREATE)
+        self.db(DbCmd.CREATE)
         logger.debug("Db has been created, now it is setting up...")
         self.pool_su = ConnectionManager(db_params_su)
         with self.pool_su.get_connection() as conn:
@@ -85,7 +85,7 @@ class Database:
             conn.autocommit = True
             cursor = conn.cursor()
             cursor.execute(query)
-            if cmd == DB_CMD.DROP:
+            if cmd == DbCmd.DROP:
                 cursor.execute(sql.SQL("DROP USER {0}").format(sql.SQL(db_params["user"])))
         except Exception as e:
             logger.error(f"Cannot {cmd} db: {e}")
