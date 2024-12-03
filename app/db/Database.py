@@ -141,6 +141,29 @@ class Database:
         self.pool.free()
         self.pool_su.free()
 
+    def get_table(self, table_name: DbTable, id: int = None):
+        logger.debug(f"get_table {table_name}")
+        with self.pool.get_connection() as conn:
+            with conn.cursor() as cursor:
+                try:
+                    req = f"get_{table_name}"
+                    if id:
+                        cursor.callproc(req, [id])
+                        res = cursor.fetchone()
+                    else:
+                        cursor.callproc(req)
+                        res = cursor.fetchall()
+                    return res
+                except Exception as e:
+                    logger.error(e.pgerror)
+                    match e.pgcode:
+                        case PgError.RAISE:
+                            raise FKError(f"Указанного {table_name} не существует")
+                        case PgError.CONVERT:
+                            raise ConvertError(f"Неверный формат {table_name}_id, ожидалось число")
+                        case _:
+                            raise UnknownError()
+
     # Client
 
     def add_client(self, fullname: str):
@@ -316,28 +339,6 @@ class Database:
             with conn.cursor() as cursor:
                 try:
                     cursor.execute("call delete_sportcenter(%s)", (sportcenter_id,))
-                except Exception as e:
-                    logger.error(e.pgerror)
-                    match e.pgcode:
-                        case PgError.RAISE:
-                            raise FKError("Указанного спортивного центра не существует")
-                        case PgError.CONVERT:
-                            raise ConvertError("Неверный формат sportcenter_id, ожидалось число")
-                        case _:
-                            raise UnknownError()
-
-    def get_sportcenter(self, sportcenter_id: int = None):
-        logger.debug("get_sportcenter")
-        with self.pool.get_connection() as conn:
-            with conn.cursor() as cursor:
-                try:
-                    if sportcenter_id:
-                        cursor.callproc("get_sportcenter", [sportcenter_id])
-                        res = cursor.fetchone()
-                    else:
-                        cursor.callproc("get_sportcenter")
-                        res = cursor.fetchall()
-                    return res
                 except Exception as e:
                     logger.error(e.pgerror)
                     match e.pgcode:
