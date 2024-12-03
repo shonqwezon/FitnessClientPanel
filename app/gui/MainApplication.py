@@ -1,5 +1,8 @@
 import tkinter as tk
 from tkinter import messagebox, ttk
+from app.db import database, exceptions
+
+import hashlib
 
 
 class MainApplication(tk.Tk):
@@ -46,17 +49,25 @@ class MainApplication(tk.Tk):
         error_label = tk.Label(self, text="", fg="red")
         error_label.pack()
 
+        def hash_string_sha256(input_string):
+            # Преобразуем строку в байты
+            input_bytes = input_string.encode("utf-8")
+            # Хешируем строку
+            hash_object = hashlib.sha256(input_bytes)
+            # Преобразуем хеш в шестнадцатеричный формат
+            return hash_object.hexdigest()
+
         # Кнопка входа
         def login():
             login = login_var.get()
             password = password_var.get()
 
-            if login == "admin" and password == "admin":
+            if database.is_admin(login, password):
                 self.user_data["username"] = "Администратор"
                 self.user_data["role"] = "admin"
                 self.show_admin_menu()
-            elif login == "manager" and password == "manager":
-                self.user_data["username"] = "Менеджер"
+            elif database.is_correct_manager(login, hash_string_sha256(password)):
+                self.user_data["username"] = login
                 self.user_data["role"] = "manager"
                 self.show_manager_menu()
             else:
@@ -232,16 +243,16 @@ class MainApplication(tk.Tk):
 
         # Поле для адреса зала
         tk.Label(self, text="Введите адрес зала:").pack(pady=5)
-        office_adress = tk.StringVar()
-        tk.Entry(self, textvariable=office_adress).pack(pady=10)
+        office_address = tk.StringVar()
+        tk.Entry(self, textvariable=office_address).pack(pady=10)
 
         # Поле для времени открытия зала
-        tk.Label(self, text="Введите время открытия зала:").pack(pady=5)
+        tk.Label(self, text="Введите время открытия зала (чч:мм):").pack(pady=5)
         office_open_time = tk.StringVar()
         tk.Entry(self, textvariable=office_open_time).pack(pady=10)
 
         # Поле для времени открытия зала
-        tk.Label(self, text="Введите время закрытия зала:").pack(pady=5)
+        tk.Label(self, text="Введите время закрытия зала (чч:мм):").pack(pady=5)
         office_close_time = tk.StringVar()
         tk.Entry(self, textvariable=office_close_time).pack(pady=10)
 
@@ -251,7 +262,17 @@ class MainApplication(tk.Tk):
         tk.Entry(self, textvariable=office_cost_ratio).pack(pady=10)
 
         def admin_offices_add_confirm():
-            pass
+            try:
+                name = office_name.get()
+                address = office_address.get()
+                open_time = office_open_time.get()
+                close_time = office_close_time.get()
+                cost_ratio = office_cost_ratio.get()
+
+                database.add_sportcenter(name, address, open_time, close_time, float(cost_ratio))
+                self.admin_offices_menu()
+            except exceptions.DbError() as ex:
+                messagebox.showwarning("Ошибка", ex)
 
         tk.Button(self, text="Добавить", width=30, command=admin_offices_add_confirm).pack(pady=5)
 
@@ -265,6 +286,7 @@ class MainApplication(tk.Tk):
 
         # Массив залов
         halls = ["Зал 1", "Зал 2", "Зал 3", "Зал 4"]
+        # halls = database.get
 
         # Переменная для хранения выбранного зала
         selected_hall = tk.StringVar(value="")
@@ -778,4 +800,5 @@ class MainApplication(tk.Tk):
         """
         if messagebox.askokcancel("Выход", "Вы уверены, что хотите выйти из приложения?"):
             # Здесь можно сохранить данные или выполнить другие действия перед выходом
+            database.close()
             self.destroy()
