@@ -12,12 +12,11 @@ logger = setup_logger(__name__)
 
 
 class ConnectionManager:
-    def __init__(self):
-        logger.info("Init connection pool")
+    def __init__(self, params: dict, autocommit=False):
+        logger.info(f"Init connection pool with autocommit = {autocommit}")
+        self.autocommit = autocommit
         try:
-            self.pool = psycopg2.pool.SimpleConnectionPool(
-                cfg.MIN_CONN, cfg.MAX_CONN, **cfg.db_params
-            )
+            self.pool = psycopg2.pool.SimpleConnectionPool(cfg.MIN_CONN, cfg.MAX_CONN, **params)
         except Exception as e:
             logger.error(f"Can't create connection to db:\n{e}")
             raise
@@ -27,6 +26,7 @@ class ConnectionManager:
         conn: connection = None
         try:
             conn = self.pool.getconn()
+            conn.autocommit = self.autocommit
             yield conn
         except Exception as e:
             logger.error(f"Error can't get connection:\n{e}")
@@ -37,4 +37,5 @@ class ConnectionManager:
 
     def free(self):
         logger.info("Free connection pool")
-        self.pool.closeall()
+        if not self.pool.closed:
+            self.pool.closeall()

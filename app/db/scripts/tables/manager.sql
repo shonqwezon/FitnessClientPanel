@@ -6,3 +6,5 @@ CREATE TABLE IF NOT EXISTS manager (
     password_hash VARCHAR(64) NOT NULL,
     sportcenter_id INTEGER NOT NULL
 );
+
+CREATE INDEX IF NOT EXISTS idx_pass_hash ON manager (password_hash);

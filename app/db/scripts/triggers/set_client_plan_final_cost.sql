@@ -1,25 +1,10 @@
 CREATE OR REPLACE FUNCTION set_plan_final_cost()
-RETURNS TRIGGER AS
-$$
-DECLARE
-    plan_record RECORD;
-    total_service_cost NUMERIC(5, 2);
+RETURNS TRIGGER
+SECURITY DEFINER
+AS $$
 BEGIN
-    SELECT p.base_cost, p.begin_time, p.end_time, sc.cost_ratio
-    INTO plan_record
-    FROM plan p
-    JOIN sportcenter sc ON sportcenter.id == p.sportcenter_id
-    WHERE p.id == NEW.plan_id;
-
-    SELECT COALESCE(SUM(s.cost), 0)
-    INTO total_service_cost
-    FROM plan_service ps
-    JOIN service s ON ps.service_id = s.id
-    WHERE ps.plan_id = NEW.plan_id;
-
-    NEW.final_cost := (plan_record.base_cost + total_service_cost *
-        (EXTRACT(EPOCH FROM (plan_record.end_time - plan_record.begin_time)) / 3600)) * plan_record.cost_ratio;
-
+    NEW.final_cost := app.calculate_plan_cost(NEW.plan_id) * (NEW.plan_end_date - NEW.plan_begin_date);
+    RAISE NOTICE 'Final cost has been updated.';
     RETURN NEW;
 END;
 $$ LANGUAGE plpgsql;
