@@ -451,49 +451,54 @@ class MainApplication(tk.Tk):
         self.clear_screen()
 
         # Заголовок
-        tk.Label(self, text="Выберите зал", font=("Arial", 24)).pack(pady=20)
+        tk.Label(self, text="Выберите зал для тарифа", font=("Arial", 24)).pack(pady=20)
 
         # Массив залов
-        halls = ["Зал 1", "Зал 2", "Зал 3", "Зал 4"]
+        halls = database.get_table(DbTable.SPORTCENTER)
+        halls_names = [hall[1] for hall in halls]
 
         # Список залов
-        selected_hall = tk.StringVar(value="")
-        hall_list = tk.Listbox(self, listvariable=tk.StringVar(value=halls), height=len(halls))
+        hall_list = tk.Listbox(
+            self, listvariable=tk.StringVar(value=halls_names), height=len(halls_names)
+        )
         hall_list.pack(pady=10)
 
         # Кнопка "Выбрать"
         def confirm_hall():
             try:
                 index = hall_list.curselection()[0]
-                selected_hall.set(halls[index])
-                self.admin_plans_choose_services(selected_hall.get())
+                hall_id = halls[index][0]
+                self.admin_plans_choose_services(halls[index][1], hall_id)
             except IndexError:
                 messagebox.showwarning("Ошибка", "Пожалуйста, выберите зал.")
+            except exceptions.DbError as ex:
+                messagebox.showwarning(ex)
 
         tk.Button(self, text="Выбрать", width=30, command=confirm_hall).pack(pady=10)
 
         # Кнопка "Назад"
         tk.Button(self, text="Назад", width=30, command=self.admin_plans_menu).pack(pady=10)
 
-    def admin_plans_choose_services(self, hall_name):
+    def admin_plans_choose_services(self, hall_name, hall_id):
         """
         Выбор услуг для тарифа.
         """
         self.clear_screen()
 
         # Заголовок
-        tk.Label(self, text=f"Услуги для {hall_name}", font=("Arial", 24)).pack(pady=20)
+        tk.Label(self, text=f"Услуги для тарифа в {hall_name}", font=("Arial", 24)).pack(pady=20)
 
         # Массив услуг
-        services = ["Йога", "Тренажерный зал", "Кардио", "Плавание"]
+        services = database.get_table(DbTable.SERVICE)
+        services_names = [service[1] for service in services]
 
         # Список услуг с множественным выбором
         selected_services = []
         service_list = tk.Listbox(
             self,
             selectmode=tk.MULTIPLE,
-            listvariable=tk.StringVar(value=services),
-            height=len(services),
+            listvariable=tk.StringVar(value=services_names),
+            height=len(services_names),
         )
         service_list.pack(pady=10)
 
@@ -502,8 +507,8 @@ class MainApplication(tk.Tk):
             selected_indices = service_list.curselection()
             if selected_indices:
                 for index in selected_indices:
-                    selected_services.append(services[index])
-                self.admin_plans_add_details(hall_name, selected_services)
+                    selected_services.append(services[index][0])
+                self.admin_plans_add_details(hall_name, hall_id, selected_services)
             else:
                 messagebox.showwarning("Ошибка", "Пожалуйста, выберите хотя бы одну услугу.")
 
@@ -514,7 +519,7 @@ class MainApplication(tk.Tk):
             self, text="Назад", width=30, command=lambda: self.admin_plans_choose_office()
         ).pack(pady=10)
 
-    def admin_plans_add_details(self, hall_name, selected_services):
+    def admin_plans_add_details(self, hall_name, hall_id, selected_services):
         """
         Ввод параметров тарифа.
         """
@@ -523,7 +528,7 @@ class MainApplication(tk.Tk):
         # Заголовок
         tk.Label(self, text=f"Параметры тарифа для {hall_name}", font=("Arial", 24)).pack(pady=20)
 
-        tk.Label(self, text=f"Выбранные услуги: {', '.join(selected_services)}").pack(pady=10)
+        # tk.Label(self, text=f"Выбранные услуги: {', '.join(selected_services)}").pack(pady=10)
 
         # Поля для ввода параметров
         tk.Label(self, text="Базовая цена:").pack(pady=5)
@@ -548,12 +553,17 @@ class MainApplication(tk.Tk):
                 messagebox.showwarning("Ошибка", "Пожалуйста, заполните все поля.")
                 return
 
-            messagebox.showinfo(
-                "Успех",
-                f"Тариф добавлен:\nЗал: {hall_name}\nУслуги: {', '.join(selected_services)}\nЦена:\
- {base_price}\nВремя: {start_time} - {end_time}",
-            )
-            self.admin_plans_menu()
+            try:
+                database.add_plan(
+                    int(base_price), start_time, end_time, hall_id, selected_services
+                )
+                messagebox.showinfo(
+                    "Успех",
+                    f"Тариф добавлен:\nЗал: {hall_name}\nВремя: {start_time} - {end_time}",
+                )
+                self.admin_plans_menu()
+            except exceptions.DbError as ex:
+                messagebox.showwarning(ex)
 
         tk.Button(self, text="Добавить", width=30, command=confirm_details).pack(pady=10)
 
@@ -575,19 +585,23 @@ class MainApplication(tk.Tk):
         tk.Label(self, text="Удаление тарифа", font=("Arial", 24)).pack(pady=20)
 
         # Массив залов
-        halls = ["Зал 1", "Зал 2", "Зал 3", "Зал 4"]
+        halls = database.get_table(DbTable.SPORTCENTER)
+        halls_names = [hall[1] for hall in halls]
 
         # Список залов
-        selected_hall = tk.StringVar(value="")
-        hall_list = tk.Listbox(self, listvariable=tk.StringVar(value=halls), height=len(halls))
+        hall_list = tk.Listbox(
+            self, listvariable=tk.StringVar(value=halls_names), height=len(halls_names)
+        )
         hall_list.pack(pady=10)
 
         # Кнопка "Выбрать"
         def confirm_hall():
             try:
                 index = hall_list.curselection()[0]
-                selected_hall.set(halls[index])
-                self.admin_plans_delete_choose_tariff(selected_hall.get())
+                hall_id = halls[index][0]
+                self.admin_plans_delete_choose_tariff(halls[index][1], hall_id)
+            except exceptions.DbError as ex:
+                messagebox.showwarning(ex)
             except IndexError:
                 messagebox.showwarning("Ошибка", "Пожалуйста, выберите зал.")
 
@@ -596,7 +610,7 @@ class MainApplication(tk.Tk):
         # Кнопка "Назад"
         tk.Button(self, text="Назад", width=30, command=self.admin_plans_menu).pack(pady=10)
 
-    def admin_plans_delete_choose_tariff(self, hall_name):
+    def admin_plans_delete_choose_tariff(self, hall_name, hall_id):
         """
         Выбор тарифа для удаления.
         """
@@ -606,12 +620,11 @@ class MainApplication(tk.Tk):
         tk.Label(self, text=f"Удаление тарифа из {hall_name}", font=("Arial", 24)).pack(pady=20)
 
         # Массив тарифов (пример)
-        tariffs = ["Тариф 1", "Тариф 2", "Тариф 3"]
+        tariffs = database.get_table(DbTable.PLAN, hall_id)
 
         # Список тарифов
-        selected_tariff = tk.StringVar(value="")
         tariff_list = tk.Listbox(
-            self, listvariable=tk.StringVar(value=tariffs), height=len(tariffs)
+            self, listvariable=tk.StringVar(value=tariffs), height=len(tariffs), width=50
         )
         tariff_list.pack(pady=10)
 
@@ -619,11 +632,11 @@ class MainApplication(tk.Tk):
         def confirm_delete():
             try:
                 index = tariff_list.curselection()[0]
-                selected_tariff.set(tariffs[index])
-                tariff_name = selected_tariff.get()
-                # Удаляем тариф (в реальной реализации подключите базу данных или API)
+                selected_tariff_id = tariffs[index][0]
+                tariff_name = tariffs[index][1]
+                database.delete_plan(selected_tariff_id)
                 messagebox.showinfo("Успех", f"Тариф '{tariff_name}' из {hall_name} удален.")
-                self.show_admin_menu()
+                self.admin_plans_menu()
             except IndexError:
                 messagebox.showwarning("Ошибка", "Пожалуйста, выберите тариф для удаления.")
 
@@ -633,14 +646,6 @@ class MainApplication(tk.Tk):
         tk.Button(self, text="Назад", width=30, command=self.admin_plans_delete).pack(pady=10)
 
     # Просмотр
-
-    def delete_table_from_db(self, table_name):
-        """
-        Удаляет таблицу из базы данных.
-        """
-        # Здесь будет логика удаления таблицы из БД
-        messagebox.showinfo("Удаление", f"Таблица '{table_name}' успешно удалена.")
-        pass
 
     def admin_view_menu(self):
         """Меню просмотра данных."""
@@ -693,21 +698,28 @@ class MainApplication(tk.Tk):
         tk.Label(self, text="Менеджеры", font=("Arial", 24)).pack(pady=20)
 
         # Пример данных
-        managers = [
-            {"ФИО": "Иванов Иван Иванович", "Email": "ivanov@example.com"},
-            {"ФИО": "Петров Петр Петрович", "Email": "petrov@example.com"},
-        ]
+        managers_db = database.get_table(DbTable.MANAGER)
+        managers = []
+        for manager in managers_db:
+            managers.append({"ФИО": manager[0], "Email": manager[2]})
+
+        logger.debug(managers)
 
         # Создаем таблицу
         columns = ["ФИО", "Email"]
         self.create_table(columns, managers)
+
+        def delete_table_from_db():
+            database.drop_table(DbTable.MANAGER)
+            messagebox.showinfo("Удаление", "Таблица менеджеров успешно удалена.")
+            self.quit()
 
         # Кнопка "Удалить таблицу"
         tk.Button(
             self,
             text="Удалить таблицу",
             width=30,
-            command=lambda: self.delete_table_from_db("managers"),
+            command=delete_table_from_db,
         ).pack(pady=10)
 
         # Кнопка "Назад"
@@ -720,21 +732,36 @@ class MainApplication(tk.Tk):
         tk.Label(self, text="Залы", font=("Arial", 24)).pack(pady=20)
 
         # Пример данных
-        halls = [
-            {"Зал": "Зал 1", "Адрес": "ул. Ленина, 1"},
-            {"Зал": "Зал 2", "Адрес": "ул. Советская, 10"},
-        ]
+        halls_db = database.get_table(DbTable.SPORTCENTER)
+        logger.debug(halls_db)
+        halls = []
+
+        for hall in halls_db:
+            halls.append(
+                {
+                    "Назваиние": hall[1],
+                    "Адрес": hall[2],
+                    # "Открытие": hall[2],
+                    # "Закртыие": hall[3],
+                    # "Коэфф. стоимости": hall[4],
+                }
+            )
 
         # Создаем таблицу
-        columns = ["Зал", "Адрес"]
+        columns = ["Назваиние", "Адрес"]  # "Открытие", "Закртыие", "Коэфф. стоимости"]
         self.create_table(columns, halls)
+
+        def delete_table_from_db():
+            database.drop_table(DbTable.SPORTCENTER)
+            messagebox.showinfo("Удаление", "Таблица залов успешно удалена.")
+            self.quit()
 
         # Кнопка "Удалить таблицу"
         tk.Button(
             self,
             text="Удалить таблицу",
             width=30,
-            command=lambda: self.delete_table_from_db("halls"),
+            command=delete_table_from_db,
         ).pack(pady=10)
 
         # Кнопка "Назад"
@@ -747,21 +774,25 @@ class MainApplication(tk.Tk):
         tk.Label(self, text="Услуги", font=("Arial", 24)).pack(pady=20)
 
         # Пример данных
-        services = [
-            {"Услуга": "Йога", "Цена": "500 руб"},
-            {"Услуга": "Тренажерный зал", "Цена": "1000 руб"},
-        ]
+        services_db = database.get_table(DbTable.SERVICE)
+        logger.debug(services_db)
+        services = [{"Услуга": service[1], "Стоимость": service[2]} for service in services_db]
 
         # Создаем таблицу
-        columns = ["Услуга", "Цена"]
+        columns = ["Услуга", "Стоимость"]
         self.create_table(columns, services)
+
+        def delete_table_from_db():
+            database.drop_table(DbTable.SPORTCENTER)
+            messagebox.showinfo("Удаление", "Таблица услуг успешно удалена.")
+            self.quit()
 
         # Кнопка "Удалить таблицу"
         tk.Button(
             self,
             text="Удалить таблицу",
             width=30,
-            command=lambda: self.delete_table_from_db("services"),
+            command=delete_table_from_db,
         ).pack(pady=10)
 
         # Кнопка "Назад"
@@ -774,6 +805,8 @@ class MainApplication(tk.Tk):
         tk.Label(self, text="Клиенты", font=("Arial", 24)).pack(pady=20)
 
         # Пример данных
+        clients_db = database.get_table(DbTable.CLIENT)
+        logger.debug(clients_db)
         clients = [
             {"ФИО": "Сидоров Сидр Сидорович"},
             {"ФИО": "Александров Александр Александрович"},
@@ -840,10 +873,90 @@ class MainApplication(tk.Tk):
         tk.Label(self, text=f"Добро пожаловать, {self.user_data['username']}").pack(pady=10)
 
         # Кнопки
-        tk.Button(self, text="Добавить клиента", width=30).pack(pady=5)
-        tk.Button(self, text="Удалить клиента", width=30).pack(pady=5)
-        tk.Button(self, text="Просмотр клиентов", width=30).pack(pady=5)
+        tk.Button(self, text="Тарифы", width=30, command=self.manager_plan_services).pack(pady=5)
+        tk.Button(self, text="Услуги", width=30, command=self.manager_services).pack(pady=5)
+        tk.Button(self, text="Залы", width=30).pack(pady=5)
+        tk.Button(self, text="Клиенты", width=30).pack(pady=5)
         tk.Button(self, text="Выйти", width=30, command=self.show_login_screen).pack(pady=20)
+
+    # просмотр услуг
+    def manager_services(self):
+        self.clear_screen()
+
+        tk.Label(self, text="Услуги", font=("Arial", 24)).pack(pady=20)
+
+        # Пример данных
+        services_db = database.get_table(DbTable.SERVICE)
+        logger.debug(services_db)
+        services = [{"Услуга": service[1], "Стоимость": service[2]} for service in services_db]
+
+        # Создаем таблицу
+        columns = ["Услуга", "Стоимость"]
+        self.create_table(columns, services)
+
+        tk.Button(self, text="Назад", width=30, command=self.show_manager_menu).pack(pady=5)
+
+    # выбор услуг для подбора тарифа
+    def manager_plan_services(self):
+        self.clear_screen()
+
+        # Заголовок
+        tk.Label(self, text="Услуги для побдора тарифа", font=("Arial", 24)).pack(pady=20)
+
+        # Массив услуг
+        services = database.get_table(DbTable.SERVICE)
+        services_names = [service[1] for service in services]
+
+        # Список услуг с множественным выбором
+        selected_services = []
+        service_list = tk.Listbox(
+            self,
+            selectmode=tk.MULTIPLE,
+            listvariable=tk.StringVar(value=services_names),
+            height=len(services_names),
+        )
+        service_list.pack(pady=10)
+
+        # Кнопка "Выбрать"
+        def confirm_services():
+            selected_indices = service_list.curselection()
+            if selected_indices:
+                for index in selected_indices:
+                    selected_services.append(services[index][0])
+                self.manager_plan_get(selected_services)
+            else:
+                messagebox.showwarning("Ошибка", "Пожалуйста, выберите хотя бы одну услугу.")
+
+        tk.Button(self, text="Выбрать", width=30, command=confirm_services).pack(pady=10)
+
+    def manager_plan_get(self, services):
+        self.clear_screen()
+
+        tk.Label(self, text="Тарифы с выбранными услугами", font=("Arial", 24)).pack(pady=20)
+
+        # Пример данных
+        try:
+            plans_db = database.get_table(DbTable.PLAN, services)
+        except exceptions.DbError as ex:
+            messagebox.showwarning(ex)
+            self.show_manager_menu()
+
+        logger.debug(plans_db)
+        plans = [
+            {
+                "Стоимость": service[1],
+                "Начало": service[2],
+                "Окончание": service[3],
+                "Услуги": service[4],
+                "Зал": service[5],
+                "Адрес": service[6],
+            }
+            for service in plans_db
+        ]
+
+        # Создаем таблицу
+        columns = ["Стоимость", "Начало", "Окончание", "Услуги", "Зал", "Адрес"]
+        self.create_table(columns, plans)
 
     # закртыть приложение
     def on_close(self):
