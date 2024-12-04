@@ -269,10 +269,14 @@ class MainApplication(tk.Tk):
                 close_time = office_close_time.get()
                 cost_ratio = office_cost_ratio.get()
 
-                database.add_sportcenter(name, address, open_time, close_time, float(cost_ratio))
+                database.add_sportcenter(name, address, open_time, close_time, cost_ratio)
+                messagebox.showinfo("Успех", f"Зал {name} добавлен")
                 self.admin_offices_menu()
-            except exceptions.DbError() as ex:
-                messagebox.showwarning("Ошибка", ex)
+
+            except exceptions.DbError as ex:
+                messagebox.showwarning(title="Ошибка", message=str(ex))
+            except Exception as ex:
+                messagebox.showwarning(title="Ошибка", message=str(ex))
 
         tk.Button(self, text="Добавить", width=30, command=admin_offices_add_confirm).pack(pady=5)
 
@@ -339,11 +343,18 @@ class MainApplication(tk.Tk):
         # Кнопка "Подтвердить"
         def confirm_service():
             service = name_var.get().strip()
-            if service:
-                messagebox.showinfo("Успех", f"Услуга '{service}' добавлена.")
-                self.show_admin_menu()
-            else:
-                messagebox.showwarning("Ошибка", "Введите название услуги.")
+            cost = cost_var.get()
+            try:
+                if service:
+                    messagebox.showinfo("Успех", f"Услуга '{service}' добавлена.")
+
+                    database.add_service(service, int(cost))
+
+                    self.admin_services_menu()
+                else:
+                    messagebox.showwarning("Ошибка", "Введите название услуги.")
+            except exceptions.DbError as ex:
+                messagebox.showwarning("Oшибка", ex)
 
         tk.Button(self, text="Подтвердить", width=30, command=confirm_service).pack(pady=10)
 
@@ -760,12 +771,22 @@ class MainApplication(tk.Tk):
         tk.Label(self, text="Удаление", font=("Arial", 24)).pack(pady=20)
 
         def delete_all_tables():
-            pass
+            database.drop_table()
+            messagebox.showinfo("Удаление", "Все таблицы удалены")
+            database.close()
+            self.quit()
 
-        tk.Button(
-            self, text="Удалить все таблицы", width=30, command=self.admin_view_services
-        ).pack(pady=5)
-        tk.Button(self, text="Удалить БД", width=30, command=self.admin_view_clients).pack(pady=5)
+        tk.Button(self, text="Удалить все таблицы", width=30, command=delete_all_tables).pack(
+            pady=5
+        )
+
+        def delete_db():
+            database.drop_table()
+            messagebox.showinfo("Удаление", "Всё...")
+            database.close()
+            self.quit()
+
+        tk.Button(self, text="Удалить БД", width=30, command=delete_db).pack(pady=5)
 
         tk.Button(self, text="Назад", width=30, command=self.show_admin_menu).pack(pady=5)
 
