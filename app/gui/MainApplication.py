@@ -133,25 +133,27 @@ class MainApplication(tk.Tk):
         self.clear_screen()
 
         # Заголовок
-        tk.Label(self, text="Выбор спортзала", font=("Arial", 24)).pack(pady=20)
+        tk.Label(self, text="Выбор спортзала для менеджера", font=("Arial", 24)).pack(pady=20)
 
         # Массив залов
-        halls = ["Зал 1", "Зал 2", "Зал 3", "Зал 4"]
+        halls = database.get_table(DbTable.SPORTCENTER)
+        logger.debug(halls)
 
-        # Переменная для хранения выбранного зала
-        selected_hall = tk.StringVar(value="")
+        hall_names = [hall[1] for hall in halls]
 
         # Список с залами
-        tk.Label(self, text="Выберите спортзал:").pack(pady=5)
-        hall_list = tk.Listbox(self, listvariable=tk.StringVar(value=halls), height=len(halls))
+        hall_list = tk.Listbox(
+            self, listvariable=tk.StringVar(value=hall_names), height=len(hall_names)
+        )
         hall_list.pack(pady=10)
 
         # Кнопка "Подтвердить"
         def confirm_hall():
             try:
                 index = hall_list.curselection()[0]
-                selected_hall.set(halls[index])
-                self.admin_managers_input_name(selected_hall.get())
+
+                selected_id = halls[index][0]
+                self.admin_managers_input_name(halls[index][1], selected_id)
             except IndexError:
                 messagebox.showwarning("Ошибка", "Пожалуйста, выберите спортзал.")
 
@@ -160,7 +162,7 @@ class MainApplication(tk.Tk):
         # Кнопка "Назад"
         tk.Button(self, text="Назад", width=30, command=self.admin_managers_menu).pack(pady=10)
 
-    def admin_managers_input_name(self, hall_name):
+    def admin_managers_input_name(self, hall_name, hall_id):
         """
         Экран ввода имени менеджера.
         """
@@ -181,12 +183,30 @@ class MainApplication(tk.Tk):
         email_var = tk.StringVar()
         tk.Entry(self, textvariable=email_var).pack(pady=10)
 
+        # Поле для ввода пароля
+        tk.Label(self, text="Введите пароль менеджера:").pack(pady=5)
+        password_var = tk.StringVar()
+        tk.Entry(self, textvariable=password_var).pack(pady=10)
+
+        def hash_string_sha256(input_string):
+            # Преобразуем строку в байты
+            input_bytes = input_string.encode("utf-8")
+            # Хешируем строку
+            hash_object = hashlib.sha256(input_bytes)
+            # Преобразуем хеш в шестнадцатеричный формат
+            return hash_object.hexdigest()
+
         # Кнопка "Подтвердить"
         def confirm_name():
             manager_name = name_var.get().strip()
-            if manager_name:
+            email = email_var.get().strip()
+            password = password_var.get().strip()
+            if manager_name and email and password:
+                database.add_manager(
+                    manager_name, email, hash_string_sha256(password), int(hall_id)
+                )
                 messagebox.showinfo("Успех", f"Менеджер '{manager_name}' добавлен в {hall_name}.")
-                self.show_admin_menu()
+                self.admin_managers_menu()
             else:
                 messagebox.showwarning("Ошибка", "Введите имя менеджера.")
 
@@ -214,12 +234,15 @@ class MainApplication(tk.Tk):
         # Кнопка "Удалить"
         def delete_manager():
             manager_name = name_var.get().strip()
-            if manager_name:
-                # Здесь будет логика удаления менеджера
-                messagebox.showinfo("Успех", f"Менеджер '{manager_name}' удален.")
-                self.show_admin_menu()
-            else:
-                messagebox.showwarning("Ошибка", "Введите имя менеджера.")
+            try:
+                if manager_name:
+                    database.delete_manager(manager_name)
+                    messagebox.showinfo("Успех", f"Менеджер '{manager_name}' удален.")
+                    self.admin_managers_menu()
+                else:
+                    messagebox.showwarning("Ошибка", "Введите имя менеджера.")
+            except exceptions.DbError as ex:
+                messagebox.showwarning("Ошибка", ex)
 
         tk.Button(self, text="Удалить", width=30, command=delete_manager).pack(pady=10)
 
@@ -296,12 +319,8 @@ class MainApplication(tk.Tk):
 
         halls = database.get_table(DbTable.SPORTCENTER)
         logger.debug(halls)
-        # hall_dict = {hall[0]: hall[1] for hall in halls}
-        hall_names = [hall[1] for hall in halls]
-        # halls = ["Зал 1", "Зал 2", "Зал 3", "Зал 4"]
 
-        # Переменная для хранения выбранного зала
-        # selected_hall = tk.StringVar(value="")
+        hall_names = [hall[1] for hall in halls]
 
         # Список с залами
         tk.Label(self, text="Выберите спортзал:").pack(pady=5)
@@ -828,7 +847,7 @@ class MainApplication(tk.Tk):
         tk.Button(self, text="Добавить клиента", width=30).pack(pady=5)
         tk.Button(self, text="Удалить клиента", width=30).pack(pady=5)
         tk.Button(self, text="Просмотр клиентов", width=30).pack(pady=5)
-        tk.Button(self, text="Назад", width=30, command=self.show_admin_menu).pack(pady=20)
+        tk.Button(self, text="Выйти", width=30, command=self.show_login_screen).pack(pady=20)
 
     # закртыть приложение
     def on_close(self):
