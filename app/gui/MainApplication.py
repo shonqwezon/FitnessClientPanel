@@ -1,8 +1,12 @@
 import tkinter as tk
 from tkinter import messagebox, ttk
 from app.db import database, exceptions
+from app.db.config import DbTable
 
 import hashlib
+from app import setup_logger
+
+logger = setup_logger(__name__)
 
 
 class MainApplication(tk.Tk):
@@ -289,22 +293,34 @@ class MainApplication(tk.Tk):
         tk.Label(self, text="Удаление зала", font=("Arial", 24)).pack(pady=20)
 
         # Массив залов
-        halls = ["Зал 1", "Зал 2", "Зал 3", "Зал 4"]
-        # halls = database.get
+
+        halls = database.get_table(DbTable.SPORTCENTER)
+        logger.debug(halls)
+        # hall_dict = {hall[0]: hall[1] for hall in halls}
+        hall_names = [hall[1] for hall in halls]
+        # halls = ["Зал 1", "Зал 2", "Зал 3", "Зал 4"]
 
         # Переменная для хранения выбранного зала
-        selected_hall = tk.StringVar(value="")
+        # selected_hall = tk.StringVar(value="")
 
         # Список с залами
         tk.Label(self, text="Выберите спортзал:").pack(pady=5)
-        hall_list = tk.Listbox(self, listvariable=tk.StringVar(value=halls), height=len(halls))
+        hall_list = tk.Listbox(
+            self, listvariable=tk.StringVar(value=hall_names), height=len(hall_names)
+        )
         hall_list.pack(pady=10)
 
         def confirm_delete_office():
             try:
                 index = hall_list.curselection()[0]
-                selected_hall.set(halls[index])
-                self.show_admin_menu()
+
+                # Находим ID выбранного спортзала
+                selected_id = halls[index][0]
+
+                # Удаляем спортзал по ID
+                database.delete_sportcenter(selected_id)
+                messagebox.showinfo("Спортцентр удален")
+                self.admin_offices_menu()
             except IndexError:
                 messagebox.showwarning("Ошибка", "Пожалуйста, выберите спортзал.")
 
