@@ -356,7 +356,7 @@ class MainApplication(tk.Tk):
         tk.Label(self, text="Услуги", font=("Arial", 24)).pack(pady=20)
 
         tk.Button(self, text="Добавить", width=30, command=self.admin_services_add).pack(pady=5)
-        tk.Button(self, text="Удалить", width=30, command=self.admin_offices_delete).pack(pady=5)
+        tk.Button(self, text="Удалить", width=30, command=self.admin_services_delete).pack(pady=5)
         tk.Button(self, text="назад", command=self.show_admin_menu, width=30).pack(pady=5)
 
     def admin_services_add(self):
@@ -380,7 +380,7 @@ class MainApplication(tk.Tk):
             service = name_var.get().strip()
             cost = cost_var.get()
             try:
-                if service:
+                if service and cost.isdigit():
                     messagebox.showinfo("Успех", f"Услуга '{service}' добавлена.")
 
                     database.add_service(service, int(cost))
@@ -401,30 +401,26 @@ class MainApplication(tk.Tk):
 
         tk.Label(self, text="Удаление услуг", font=("Arial", 24)).pack(pady=20)
 
-        services = [
-            "возможность 1",
-            "возможность 2",
-            "возможность 3",
-            "возможность 4",
-            "возможность 5",
-            "возможность 6",
-            "возможность 7",
-        ]
-
-        service = tk.StringVar(value="")
+        services = database.get_table(DbTable.SERVICE)
+        logger.debug(services)
+        services_names = [service[1] for service in services]
 
         tk.Label(self, text="Выберите услугу:").pack(pady=5)
-        hall_list = tk.Listbox(
-            self, listvariable=tk.StringVar(value=services), height=len(services)
+        services_list = tk.Listbox(
+            self, listvariable=tk.StringVar(value=services_names), height=len(services_names)
         )
-        hall_list.pack(pady=10)
+        services_list.pack(pady=10)
 
         def confirm_delete_service():
             try:
-                index = hall_list.curselection()[0]
-                service.set(services[index])
-                self.show_admin_menu()
-            except IndexError:
+                index = services_list.curselection()[0]
+
+                selected_id = services[index][0]
+                database.delete_service(int(selected_id))
+                messagebox.showinfo("Услуга удалена")
+
+                self.admin_services_menu()
+            except exceptions.DbError:
                 messagebox.showwarning("Ошибка", "Пожалуйста, выберите услугу.")
 
         tk.Button(self, text="Удалить", width=30, command=confirm_delete_service).pack(pady=5)
