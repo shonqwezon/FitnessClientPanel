@@ -14,7 +14,7 @@ db_params = {
 
 db_params_su = {
     "dbname": getenv("DB_NAME"),
-    "user": "postgres",
+    "user": getenv("DB_USER_SU"),
     "password": getenv("DB_PASSWORD_SU"),
     "host": getenv("DB_HOST"),
     "port": getenv("DB_PORT"),
@@ -27,6 +27,7 @@ class DbTable(StrEnum):
     SPORTCENTER = "sportcenter"
     CLIENT = "client"
     PLAN = "plan"
+    PLAN_TECH = "plan_tech"
 
 
 class DbCmd:
