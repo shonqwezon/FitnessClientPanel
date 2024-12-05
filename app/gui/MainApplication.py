@@ -884,7 +884,7 @@ class MainApplication(tk.Tk):
         tk.Button(self, text="Тарифы", width=30, command=self.manager_plan_services).pack(pady=5)
         tk.Button(self, text="Услуги", width=30, command=self.manager_services).pack(pady=5)
         tk.Button(self, text="Залы", width=30, command=self.manager_offices).pack(pady=5)
-        tk.Button(self, text="Клиенты", width=30).pack(pady=5)
+        tk.Button(self, text="Клиенты", width=30, command=self.manager_clients_menu).pack(pady=5)
         tk.Button(self, text="Выйти", width=30, command=self.show_login_screen).pack(pady=20)
 
     # просмотр услуг
@@ -1036,6 +1036,19 @@ class MainApplication(tk.Tk):
         self.create_table(columns, plans)
 
         tk.Button(self, text="Назад", width=30, command=self.show_manager_menu).pack(pady=10)
+
+    def manager_clients_menu(self):
+        self.clear_screen()
+
+        # Заголовок
+        tk.Label(self, text="Клиенты", font=("Arial", 24)).pack(pady=20)
+
+        # Кнопки
+        tk.Button(self, text="Добавить клиента", width=30).pack(pady=5)
+        tk.Button(self, text="Найти по ФИО", width=30).pack(pady=5)
+        tk.Button(self, text="Изменить тариф", width=30).pack(pady=5)
+        tk.Button(self, text="Передать тариф", width=30).pack(pady=5)
+        tk.Button(self, text="Назад", width=30, command=self.show_manager_menu).pack(pady=20)
 
     # закртыть приложение
     def on_close(self):
