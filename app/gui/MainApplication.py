@@ -883,7 +883,7 @@ class MainApplication(tk.Tk):
         # Кнопки
         tk.Button(self, text="Тарифы", width=30, command=self.manager_plan_services).pack(pady=5)
         tk.Button(self, text="Услуги", width=30, command=self.manager_services).pack(pady=5)
-        tk.Button(self, text="Залы", width=30).pack(pady=5)
+        tk.Button(self, text="Залы", width=30, command=self.manager_offices).pack(pady=5)
         tk.Button(self, text="Клиенты", width=30).pack(pady=5)
         tk.Button(self, text="Выйти", width=30, command=self.show_login_screen).pack(pady=20)
 
@@ -939,13 +939,16 @@ class MainApplication(tk.Tk):
 
     def manager_plan_get(self, services):
         self.clear_screen()
+        logger.debug(services)
 
         tk.Label(self, text="Тарифы с выбранными услугами", font=("Arial", 24)).pack(pady=20)
 
-        # Пример данных
         try:
             plans_db = database.get_table(DbTable.PLAN, services)
         except exceptions.DbError as ex:
+            messagebox.showwarning(ex)
+            self.show_manager_menu()
+        except Exception as ex:
             messagebox.showwarning(ex)
             self.show_manager_menu()
 
@@ -965,6 +968,74 @@ class MainApplication(tk.Tk):
         # Создаем таблицу
         columns = ["Стоимость", "Начало", "Окончание", "Услуги", "Зал", "Адрес"]
         self.create_table(columns, plans)
+
+        tk.Button(self, text="Назад", width=30, command=self.show_manager_menu).pack(pady=10)
+
+    def manager_offices(self):
+        self.clear_screen()
+
+        tk.Label(self, text="Выьерите зал для просмотра тарифов", font=("Arial", 24)).pack(pady=20)
+
+        # Массив залов
+        halls = database.get_table(DbTable.SPORTCENTER)
+        logger.debug(halls)
+
+        hall_names = [hall[1] for hall in halls]
+
+        # Список с залами
+        tk.Label(self, text="Выберите спортзал:").pack(pady=5)
+        hall_list = tk.Listbox(
+            self, listvariable=tk.StringVar(value=hall_names), height=len(hall_names)
+        )
+        hall_list.pack(pady=10)
+
+        def choose_office():
+            try:
+                index = hall_list.curselection()[0]
+
+                # Находим ID выбранного спортзала
+                selected_id = halls[index][0]
+
+                self.manager_plans_for_office(selected_id)
+            except IndexError:
+                messagebox.showwarning("Ошибка", "Пожалуйста, выберите спортзал.")
+
+        tk.Button(self, text="Выбрать", width=30, command=choose_office).pack(pady=10)
+
+    def manager_plans_for_office(self, office_id):
+        self.clear_screen()
+        tk.Label(self, text="Зал и его тарифы", font=("Arial", 24)).pack(pady=20)
+
+        try:
+            office = database.get_table(DbTable.SPORTCENTER, office_id)[0]
+            tk.Label(self, text=str(office)).pack(pady=5)
+
+            tk.Label(self, text="Тарифы с выбранными услугами", font=("Arial", 24)).pack(pady=20)
+            plans_db = database.get_table(DbTable.PLAN, office_id)
+            logger.debug(plans_db)
+        except exceptions.DbError as ex:
+            messagebox.showwarning(ex)
+            self.show_manager_menu()
+        except Exception as ex:
+            messagebox.showwarning(ex)
+            self.show_manager_menu()
+
+        logger.debug(plans_db)
+        plans = [
+            {
+                "Стоимость": plan[1],
+                "Начало": plan[2],
+                "Окончание": plan[3],
+                "Услуги": plan[4],
+            }
+            for plan in plans_db
+        ]
+
+        # Создаем таблицу
+        columns = ["Стоимость", "Начало", "Окончание", "Услуги"]
+        self.create_table(columns, plans)
+
+        tk.Button(self, text="Назад", width=30, command=self.show_manager_menu).pack(pady=10)
 
     # закртыть приложение
     def on_close(self):
