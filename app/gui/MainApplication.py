@@ -73,6 +73,9 @@ class MainApplication(tk.Tk):
             elif database.is_correct_manager(login, hash_string_sha256(password)):
                 self.user_data["username"] = login
                 self.user_data["role"] = "manager"
+                self.user_data["sportcenter_id"] = database.is_correct_manager(
+                    login, hash_string_sha256(password)
+                )
                 self.show_manager_menu()
             else:
                 error_label.config(text="Неверный логин или пароль")
@@ -808,20 +811,25 @@ class MainApplication(tk.Tk):
         clients_db = database.get_table(DbTable.CLIENT)
         logger.debug(clients_db)
         clients = [
-            {"ФИО": "Сидоров Сидр Сидорович"},
-            {"ФИО": "Александров Александр Александрович"},
+            {"ФИО": client[1], "Баланс": client[2], "Дата регистрации": client[3]}
+            for client in clients_db
         ]
 
         # Создаем таблицу
-        columns = ["ФИО"]
+        columns = ["ФИО", "Баланс", "Дата регистрации"]
         self.create_table(columns, clients)
+
+        def delete_table_from_db():
+            database.drop_table(DbTable.SPORTCENTER)
+            messagebox.showinfo("Удаление", "Таблица клиентов успешно удалена.")
+            self.quit()
 
         # Кнопка "Удалить таблицу"
         tk.Button(
             self,
             text="Удалить таблицу",
             width=30,
-            command=lambda: self.delete_table_from_db("clients"),
+            command=delete_table_from_db,
         ).pack(pady=10)
 
         # Кнопка "Назад"
