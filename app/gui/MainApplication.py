@@ -5,6 +5,7 @@ from tkinter import messagebox, ttk
 from app import setup_logger
 from app.db import database, exceptions
 from app.db.config import DbTable
+from datetime import date
 
 logger = setup_logger(__name__)
 
@@ -16,7 +17,11 @@ class MainApplication(tk.Tk):
         super().__init__()
         self.title("Fitness Client Panel")
         self.geometry("800x600")  # Устанавливаем начальный размер
-        self.user_data = {"username": None, "role": None}  # Хранение данных пользователя
+        self.user_data = {
+            "username": None,
+            "role": None,
+            "sportcenter_id": None,
+        }  # Хранение данных пользователя
 
         self.protocol("WM_DELETE_WINDOW", self.on_close)
 
@@ -1069,6 +1074,8 @@ class MainApplication(tk.Tk):
 
         tk.Button(self, text="Назад", width=30, command=self.show_manager_menu).pack(pady=10)
 
+    # Клиенты
+
     def manager_clients_menu(self):
         self.clear_screen()
         database.get_table(DbTable.CLIENT, "")
@@ -1077,13 +1084,21 @@ class MainApplication(tk.Tk):
         tk.Label(self, text="Клиенты", font=("Arial", 24)).pack(pady=20)
 
         # Кнопки
-        tk.Button(self, text="Добавить клиента", width=30, command=self.manager_clients_add).pack(
-            pady=5
-        )
+        tk.Button(
+            self, text="Добавить клиента в базу", width=30, command=self.manager_clients_add
+        ).pack(pady=5)
+        tk.Button(
+            self, text="Добавить тариф для клиента", width=30, command=self.manager_clients_add
+        ).pack(pady=5)
         tk.Button(
             self, text="Найти по ФИО", width=30, command=self.manager_clients_find_name
         ).pack(pady=5)
-        tk.Button(self, text="Изменить тариф", width=30).pack(pady=5)
+        tk.Button(
+            self,
+            text="Изменить тариф у клиента",
+            width=30,
+            command=self.manager_clietns_change_plane,
+        ).pack(pady=5)
         tk.Button(self, text="Передать тариф", width=30).pack(pady=5)
         tk.Button(self, text="Назад", width=30, command=self.show_manager_menu).pack(pady=20)
 
@@ -1120,7 +1135,7 @@ class MainApplication(tk.Tk):
             fullname = fullname_var.get().strip()
             self.manager_clients_client_info(fullname)
 
-        tk.Button(self, text="Найти", width=30, command=find).pack(pady=20)
+        tk.Button(self, text="Найти", width=30, command=find).pack(pady=10)
         tk.Button(self, text="Назад", width=30, command=self.manager_clients_menu).pack(pady=20)
 
     def manager_clients_client_info(self, fullname):
@@ -1158,6 +1173,10 @@ class MainApplication(tk.Tk):
                 messagebox.showwarning(message=ex)
                 self.manager_clients_menu()
                 return
+            except Exception as ex:
+                messagebox.showwarning(message=ex)
+                self.manager_clients_menu()
+                return
 
         tk.Button(self, text="Начислить", width=30, command=increase_balance).pack(pady=10)
 
@@ -1175,6 +1194,50 @@ class MainApplication(tk.Tk):
                 return
 
         tk.Button(self, text="Снять", width=30, command=decrease_balance).pack(pady=10)
+
+        tk.Button(self, text="Назад", width=30, command=self.manager_clients_menu).pack(pady=20)
+
+    def manager_clietns_change_plane(self):
+        self.clear_screen()
+
+        tk.Label(self, text="Изменение тарифа у клиента", font=("Arial", 24)).pack(pady=20)
+
+        tk.Label(self, text="ФИО").pack(pady=5)
+        fullname_var = tk.StringVar()
+        tk.Entry(self, textvariable=fullname_var).pack(pady=5)
+
+        tk.Label(self, text="Дата окончания").pack(pady=5)
+        date_var = tk.StringVar()
+        tk.Entry(self, textvariable=date_var).pack(pady=5)
+
+        # Массив залов
+        plans = database.get_table(DbTable.PLAN, self.user_data["sportcenter_id"])
+        plans_names = [plan[1] for plan in plans]
+
+        # Список залов
+        plan_list = tk.Listbox(
+            self, listvariable=tk.StringVar(value=plans_names), height=len(plans_names)
+        )
+        plan_list.pack(pady=10)
+
+        def change_plan():
+            try:
+                index = plan_list.curselection()[0]
+                plan_id = int(plans[index][0])
+                fullname = fullname_var.get().strip()
+                day, month, year = date_var.get().split(".")
+                end_date = date(int(year), int(month), int(day))
+
+                client = database.get_table(DbTable.CLIENT, fullname)[0]
+                logger.debug(client)
+                database.delete_client_plan(client[0], plan_id)
+                database.set_client_plan(client[0], plan_id, end_date)
+            except exceptions.DbError as ex:
+                messagebox.showwarning(message=ex)
+            except Exception as ex:
+                messagebox.showwarning(message=ex)
+
+        tk.Button(self, text="Изменить", width=30, command=change_plan).pack(pady=10)
 
         tk.Button(self, text="Назад", width=30, command=self.manager_clients_menu).pack(pady=20)
 
