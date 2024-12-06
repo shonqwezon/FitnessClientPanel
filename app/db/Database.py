@@ -8,7 +8,6 @@ from psycopg2 import sql
 from psycopg2.extensions import connection
 
 from app import setup_logger
-from psycopg2.extensions import connection
 
 from .config import DbCmd, DbTable, db_params, db_params_su
 from .connectionManager import ConnectionManager
@@ -77,8 +76,10 @@ class Database:
                 logger.error(e)
 
     def db(self, cmd: str):
-        query = sql.SQL("{0} DATABASE {1}").format(
-            sql.SQL(cmd), sql.Identifier(db_params["dbname"])
+        query = sql.SQL("{0} DATABASE {1} {2}").format(
+            sql.SQL(cmd),
+            sql.Identifier(db_params["dbname"]),
+            sql.SQL("WITH (FORCE)" if cmd == DbCmd.DROP else ""),
         )
         logger.debug(query)
         conn: connection = None
@@ -332,7 +333,7 @@ class Database:
                             raise NumericError("Ожидалось cost_ratio с точностью 3, порядка 2")
                         case PgError.CHECK:
                             raise CheckError("Нарушено ограничение таблицы")
-                        case PgError.CONVERT:
+                        case PgError.CONVERT | PgError.WRONGTIME:
                             raise ConvertError("Неверный формат данных (времени или числа)")
                         case _:
                             raise UnknownError()

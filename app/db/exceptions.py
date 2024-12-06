@@ -9,6 +9,7 @@ class PgError:
     NOQUERY = "23502"
     NOENTITY = "42P01"
     NOPROC = "42883"
+    WRONGTIME = "22007"
 
 
 class DbError(Exception):
