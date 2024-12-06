@@ -702,6 +702,8 @@ class MainApplication(tk.Tk):
 
         # Пример данных
         managers_db = database.get_table(DbTable.MANAGER)
+        logger.debug(managers_db)
+        managers_db = []
         managers = []
         for manager in managers_db:
             managers.append({"ФИО": manager[0], "Email": manager[2]})
@@ -1039,6 +1041,7 @@ class MainApplication(tk.Tk):
 
     def manager_clients_menu(self):
         self.clear_screen()
+        database.get_table(DbTable.CLIENT, "")
 
         # Заголовок
         tk.Label(self, text="Клиенты", font=("Arial", 24)).pack(pady=20)
