@@ -565,6 +565,8 @@ class MainApplication(tk.Tk):
                 self.admin_plans_menu()
             except exceptions.DbError as ex:
                 messagebox.showwarning(ex)
+                self.admin_plans_menu()
+                return
 
         tk.Button(self, text="Добавить", width=30, command=confirm_details).pack(pady=10)
 
@@ -620,9 +622,13 @@ class MainApplication(tk.Tk):
         # Заголовок
         tk.Label(self, text=f"Удаление тарифа из {hall_name}", font=("Arial", 24)).pack(pady=20)
 
-        # Массив тарифов (пример)
-        tariffs = database.get_table(DbTable.PLAN, hall_id)
-
+        # Массив тарифов
+        try:
+            tariffs = database.get_table(DbTable.PLAN, hall_id)
+        except exceptions.DbError as ex:
+            messagebox.showwarning(message=ex)
+            self.admin_plans_menu()
+            return
         # Список тарифов
         tariff_list = tk.Listbox(
             self, listvariable=tk.StringVar(value=tariffs), height=len(tariffs), width=50
@@ -699,17 +705,21 @@ class MainApplication(tk.Tk):
         tk.Label(self, text="Менеджеры", font=("Arial", 24)).pack(pady=20)
 
         # Пример данных
-        managers_db = database.get_table(DbTable.MANAGER)
+        try:
+            managers_db = database.get_table(DbTable.MANAGER)
+        except exceptions.DbError as ex:
+            messagebox.showwarning(message=ex)
+            self.admin_view_menu()
+            return
         logger.debug(managers_db)
-        managers_db = []
         managers = []
         for manager in managers_db:
-            managers.append({"ФИО": manager[0], "Email": manager[2]})
+            managers.append({"ФИО": manager[0], "Email": manager[2], "Зал": manager[4]})
 
         logger.debug(managers)
 
         # Создаем таблицу
-        columns = ["ФИО", "Email"]
+        columns = ["ФИО", "Email", "Зал"]
         self.create_table(columns, managers)
 
         def delete_table_from_db():
@@ -735,7 +745,12 @@ class MainApplication(tk.Tk):
         tk.Label(self, text="Залы", font=("Arial", 24)).pack(pady=20)
 
         # Пример данных
-        halls_db = database.get_table(DbTable.SPORTCENTER)
+        try:
+            halls_db = database.get_table(DbTable.SPORTCENTER)
+        except exceptions.DbError as ex:
+            messagebox.showwarning(message=ex)
+            self.admin_view_menu()
+            return
         logger.debug(halls_db)
         halls = []
 
@@ -777,7 +792,12 @@ class MainApplication(tk.Tk):
         tk.Label(self, text="Услуги", font=("Arial", 24)).pack(pady=20)
 
         # Пример данных
-        services_db = database.get_table(DbTable.SERVICE)
+        try:
+            services_db = database.get_table(DbTable.SERVICE)
+        except exceptions.DbError as ex:
+            messagebox.showwarning(message=ex)
+            self.admin_view_menu()
+            return
         logger.debug(services_db)
         services = [{"Услуга": service[1], "Стоимость": service[2]} for service in services_db]
 
@@ -808,7 +828,12 @@ class MainApplication(tk.Tk):
         tk.Label(self, text="Клиенты", font=("Arial", 24)).pack(pady=20)
 
         # Пример данных
-        clients_db = database.get_table(DbTable.CLIENT)
+        try:
+            clients_db = database.get_table(DbTable.CLIENT)
+        except exceptions.DbError as ex:
+            messagebox.showwarning(message=ex)
+            self.admin_view_menu()
+            return
         logger.debug(clients_db)
         clients = [
             {"ФИО": client[1], "Баланс": client[2], "Дата регистрации": client[3]}
@@ -894,7 +919,12 @@ class MainApplication(tk.Tk):
         tk.Label(self, text="Услуги", font=("Arial", 24)).pack(pady=20)
 
         # Пример данных
-        services_db = database.get_table(DbTable.SERVICE)
+        try:
+            services_db = database.get_table(DbTable.SERVICE)
+        except exceptions.DbError as ex:
+            messagebox.showwarning(message=ex)
+            self.show_manager_menu()
+            return
         logger.debug(services_db)
         services = [{"Услуга": service[1], "Стоимость": service[2]} for service in services_db]
 
@@ -948,9 +978,11 @@ class MainApplication(tk.Tk):
         except exceptions.DbError as ex:
             messagebox.showwarning(ex)
             self.show_manager_menu()
+            return
         except Exception as ex:
             messagebox.showwarning(ex)
             self.show_manager_menu()
+            return
 
         logger.debug(plans_db)
         plans = [
@@ -1045,11 +1077,106 @@ class MainApplication(tk.Tk):
         tk.Label(self, text="Клиенты", font=("Arial", 24)).pack(pady=20)
 
         # Кнопки
-        tk.Button(self, text="Добавить клиента", width=30).pack(pady=5)
-        tk.Button(self, text="Найти по ФИО", width=30).pack(pady=5)
+        tk.Button(self, text="Добавить клиента", width=30, command=self.manager_clients_add).pack(
+            pady=5
+        )
+        tk.Button(
+            self, text="Найти по ФИО", width=30, command=self.manager_clients_find_name
+        ).pack(pady=5)
         tk.Button(self, text="Изменить тариф", width=30).pack(pady=5)
         tk.Button(self, text="Передать тариф", width=30).pack(pady=5)
         tk.Button(self, text="Назад", width=30, command=self.show_manager_menu).pack(pady=20)
+
+    def manager_clients_add(self):
+        self.clear_screen()
+
+        tk.Label(self, text="Добавление клиентов", font=("Arial", 24)).pack(pady=20)
+
+        tk.Label(self, text="ФИО").pack(pady=5)
+        fullname_var = tk.StringVar()
+        tk.Entry(self, textvariable=fullname_var).pack(pady=5)
+
+        tk.Label(self, text="Дата окончания абонемента").pack(pady=5)
+        end_date_var = tk.StringVar()
+        tk.Entry(self, textvariable=end_date_var).pack(pady=5)
+
+        tk.Label(self, text="Сумма внесенной оплаты").pack(pady=5)
+        balance_var = tk.StringVar()
+        tk.Entry(self, textvariable=balance_var).pack(pady=5)
+
+        tk.Button(self, text="Добавить", width=30).pack(pady=20)
+        tk.Button(self, text="Назад", width=30, command=self.manager_clients_menu).pack(pady=20)
+
+    def manager_clients_find_name(self):
+        self.clear_screen()
+
+        tk.Label(self, text="Найти по ФИО", font=("Arial", 24)).pack(pady=20)
+
+        tk.Label(self, text="ФИО").pack(pady=5)
+        fullname_var = tk.StringVar()
+        tk.Entry(self, textvariable=fullname_var).pack(pady=5)
+
+        def find():
+            fullname = fullname_var.get().strip()
+            self.manager_clients_client_info(fullname)
+
+        tk.Button(self, text="Найти", width=30, command=find).pack(pady=20)
+        tk.Button(self, text="Назад", width=30, command=self.manager_clients_menu).pack(pady=20)
+
+    def manager_clients_client_info(self, fullname):
+        self.clear_screen()
+
+        try:
+            client = database.get_table(DbTable.CLIENT, fullname)[0]
+            logger.debug(client)
+        except exceptions.DbError as ex:
+            messagebox.showwarning(message=ex)
+            self.manager_clients_menu()
+            return
+
+        tk.Label(self, text="Информация о клиенте", font=("Arial", 24)).pack(pady=20)
+
+        text = ""
+        for i in range(1, len(client)):
+            text += str(client[i]) + "  "
+
+        tk.Label(self, text=text).pack(pady=5)
+
+        tk.Label(self, text="Сумма для изменения баланса").pack(pady=5)
+        edit_balance_var = tk.StringVar()
+        tk.Entry(self, textvariable=edit_balance_var).pack(pady=5)
+
+        def increase_balance():
+            edit_balance = edit_balance_var.get()
+
+            try:
+                database.update_balance(client[0], int(client[2]) + int(edit_balance))
+                messagebox.showinfo(message="Баланс изменен")
+                self.manager_clients_client_info(fullname)
+                return
+            except exceptions.DbError as ex:
+                messagebox.showwarning(message=ex)
+                self.manager_clients_menu()
+                return
+
+        tk.Button(self, text="Начислить", width=30, command=increase_balance).pack(pady=10)
+
+        def decrease_balance():
+            edit_balance = edit_balance_var.get()
+
+            try:
+                database.update_balance(client[0], int(client[2]) - int(edit_balance))
+                messagebox.showinfo(message="Баланс изменен")
+                self.manager_clients_client_info(fullname)
+                return
+            except exceptions.DbError as ex:
+                messagebox.showwarning(message=ex)
+                self.manager_clients_menu()
+                return
+
+        tk.Button(self, text="Снять", width=30, command=decrease_balance).pack(pady=10)
+
+        tk.Button(self, text="Назад", width=30, command=self.manager_clients_menu).pack(pady=20)
 
     # закртыть приложение
     def on_close(self):
