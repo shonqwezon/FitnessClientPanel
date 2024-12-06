@@ -1,5 +1,5 @@
 CREATE OR REPLACE FUNCTION app.get_manager()
-RETURNS TABLE (fullname VARCHAR(50), assign_date TIMESTAMP, email VARCHAR(50))
+RETURNS TABLE (fullname VARCHAR(50), assign_date TIMESTAMP, email VARCHAR(50), sportcenter_id INTEGER)
 SECURITY DEFINER
 AS $$
 BEGIN

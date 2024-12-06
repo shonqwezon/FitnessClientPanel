@@ -1,10 +1,10 @@
+import hashlib
 import tkinter as tk
 from tkinter import messagebox, ttk
+
+from app import setup_logger
 from app.db import database, exceptions
 from app.db.config import DbTable
-
-import hashlib
-from app import setup_logger
 
 logger = setup_logger(__name__)
 
@@ -73,9 +73,7 @@ class MainApplication(tk.Tk):
             elif database.is_correct_manager(login, hash_string_sha256(password)):
                 self.user_data["username"] = login
                 self.user_data["role"] = "manager"
-                self.user_data["sportcenter_id"] = database.is_correct_manager(
-                    login, hash_string_sha256(password)
-                )
+                self.user_data["sportcenter_id"] = database.get_table(DbTable.MANAGER)[0][3]
                 self.show_manager_menu()
             else:
                 error_label.config(text="Неверный логин или пароль")
@@ -853,7 +851,7 @@ class MainApplication(tk.Tk):
         )
 
         def delete_db():
-            database.drop_table()
+            database.drop_db()
             messagebox.showinfo("Удаление", "Всё...")
             database.close()
             self.quit()
