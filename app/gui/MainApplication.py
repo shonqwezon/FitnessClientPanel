@@ -1088,7 +1088,10 @@ class MainApplication(tk.Tk):
             self, text="Добавить клиента в базу", width=30, command=self.manager_clients_add_client
         ).pack(pady=5)
         tk.Button(
-            self, text="Добавить тариф для клиента", width=30, command=self.manager_clients_add
+            self,
+            text="Добавить тариф для клиента",
+            width=30,
+            command=self.manager_clients_add_plan_for_client,
         ).pack(pady=5)
         tk.Button(
             self, text="Найти по ФИО", width=30, command=self.manager_clients_find_name
@@ -1102,24 +1105,48 @@ class MainApplication(tk.Tk):
         tk.Button(self, text="Передать тариф", width=30).pack(pady=5)
         tk.Button(self, text="Назад", width=30, command=self.show_manager_menu).pack(pady=20)
 
-    def manager_clients_add(self):
+    def manager_clients_add_plan_for_client(self):
         self.clear_screen()
 
-        tk.Label(self, text="Добавление клиентов", font=("Arial", 24)).pack(pady=20)
+        tk.Label(self, text="Добавление тариф для клиента", font=("Arial", 24)).pack(pady=20)
 
         tk.Label(self, text="ФИО").pack(pady=5)
         fullname_var = tk.StringVar()
         tk.Entry(self, textvariable=fullname_var).pack(pady=5)
 
-        tk.Label(self, text="Дата окончания абонемента").pack(pady=5)
-        end_date_var = tk.StringVar()
-        tk.Entry(self, textvariable=end_date_var).pack(pady=5)
+        tk.Label(self, text="Дата окончания").pack(pady=5)
+        date_var = tk.StringVar()
+        tk.Entry(self, textvariable=date_var).pack(pady=5)
 
-        tk.Label(self, text="Сумма внесенной оплаты").pack(pady=5)
-        balance_var = tk.StringVar()
-        tk.Entry(self, textvariable=balance_var).pack(pady=5)
+        # Массив залов
+        plans = database.get_table(DbTable.PLAN, self.user_data["sportcenter_id"])
+        plans_names = [plan[1] for plan in plans]
 
-        tk.Button(self, text="Добавить", width=30).pack(pady=20)
+        # Список залов
+        plan_list = tk.Listbox(
+            self, listvariable=tk.StringVar(value=plans_names), height=len(plans_names)
+        )
+        plan_list.pack(pady=10)
+
+        def change_plan():
+            try:
+                index = plan_list.curselection()[0]
+                plan_id = int(plans[index][0])
+                fullname = fullname_var.get().strip()
+                day, month, year = date_var.get().split(".")
+                end_date = date(int(year), int(month), int(day))
+
+                client = database.get_table(DbTable.CLIENT, fullname)[0]
+                logger.debug(client)
+                database.set_client_plan(client[0], plan_id, end_date)
+                messagebox.showinfo(message="Тариф добавлен")
+            except exceptions.DbError as ex:
+                messagebox.showwarning(message=ex)
+            except Exception as ex:
+                messagebox.showwarning(message=ex)
+
+        tk.Button(self, text="Добавить", width=30, command=change_plan).pack(pady=10)
+
         tk.Button(self, text="Назад", width=30, command=self.manager_clients_menu).pack(pady=20)
 
     def manager_clients_find_name(self):
