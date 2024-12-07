@@ -426,8 +426,10 @@ class MainApplication(tk.Tk):
                 messagebox.showinfo("Услуга удалена")
 
                 self.admin_services_menu()
-            except exceptions.DbError:
-                messagebox.showwarning("Ошибка", "Пожалуйста, выберите услугу.")
+            except exceptions.DbError as ex:
+                messagebox.showwarning(message=ex)
+            except Exception:
+                messagebox.showwarning(message="Пожалуйста, выберите услугу.")
 
         tk.Button(self, text="Удалить", width=30, command=confirm_delete_service).pack(pady=5)
 
