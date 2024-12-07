@@ -1085,7 +1085,7 @@ class MainApplication(tk.Tk):
 
         # Кнопки
         tk.Button(
-            self, text="Добавить клиента в базу", width=30, command=self.manager_clients_add
+            self, text="Добавить клиента в базу", width=30, command=self.manager_clients_add_client
         ).pack(pady=5)
         tk.Button(
             self, text="Добавить тариф для клиента", width=30, command=self.manager_clients_add
@@ -1232,12 +1232,44 @@ class MainApplication(tk.Tk):
                 logger.debug(client)
                 database.delete_client_plan(client[0], plan_id)
                 database.set_client_plan(client[0], plan_id, end_date)
+                messagebox.showinfo(message="Тариф изменен")
             except exceptions.DbError as ex:
                 messagebox.showwarning(message=ex)
             except Exception as ex:
                 messagebox.showwarning(message=ex)
 
         tk.Button(self, text="Изменить", width=30, command=change_plan).pack(pady=10)
+
+        tk.Button(self, text="Назад", width=30, command=self.manager_clients_menu).pack(pady=20)
+
+    def manager_clients_add_client(self):
+        self.clear_screen()
+
+        tk.Label(self, text="Добавление клиента в базу", font=("Arial", 24)).pack(pady=20)
+
+        tk.Label(self, text="ФИО").pack(pady=5)
+        fullname_var = tk.StringVar()
+        tk.Entry(self, textvariable=fullname_var).pack(pady=5)
+
+        tk.Label(self, text="Баланс").pack(pady=5)
+        balance_var = tk.StringVar()
+        tk.Entry(self, textvariable=balance_var).pack(pady=5)
+
+        def add_client():
+            fullname = fullname_var.get().strip()
+            balance = balance_var.get().strip()
+
+            try:
+                database.add_client(fullname)
+                client_id = database.get_table(DbTable.CLIENT, fullname)[0][0]
+                database.update_balance(client_id, int(balance))
+
+            except exceptions.DbError as ex:
+                messagebox.showwarning(message=ex)
+            except Exception as ex:
+                messagebox.showwarning(message=ex)
+
+        tk.Button(self, text="Добавить", width=30, command=add_client).pack(pady=10)
 
         tk.Button(self, text="Назад", width=30, command=self.manager_clients_menu).pack(pady=20)
 
