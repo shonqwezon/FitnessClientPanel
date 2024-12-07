@@ -1102,7 +1102,9 @@ class MainApplication(tk.Tk):
             width=30,
             command=self.manager_clietns_change_plane,
         ).pack(pady=5)
-        tk.Button(self, text="Передать тариф", width=30).pack(pady=5)
+        tk.Button(
+            self, text="Передать тариф", width=30, command=self.manager_clients_transfer_plan
+        ).pack(pady=5)
         tk.Button(self, text="Назад", width=30, command=self.show_manager_menu).pack(pady=20)
 
     def manager_clients_add_plan_for_client(self):
@@ -1297,6 +1299,35 @@ class MainApplication(tk.Tk):
                 messagebox.showwarning(message=ex)
 
         tk.Button(self, text="Добавить", width=30, command=add_client).pack(pady=10)
+
+        tk.Button(self, text="Назад", width=30, command=self.manager_clients_menu).pack(pady=20)
+
+    def manager_clients_transfer_plan(self):
+        self.clear_screen()
+
+        tk.Label(self, text="Передача тарифа", font=("Arial", 24)).pack(pady=20)
+
+        tk.Label(self, text="ФИО владельца тарифа").pack(pady=5)
+        fullname_old_var = tk.StringVar()
+        tk.Entry(self, textvariable=fullname_old_var).pack(pady=5)
+
+        tk.Label(self, text="ФИО нового владельца тарифа").pack(pady=5)
+        fullname_new_var = tk.StringVar()
+        tk.Entry(self, textvariable=fullname_new_var).pack(pady=5)
+
+        def transfer_plan():
+            fullname_old = fullname_old_var.get().strip()
+            # fullname_new = fullname_new_var.get().strip()
+            try:
+                old_client_id = database.get_table(DbTable.CLIENT, fullname_old)[0][0]
+                # new_client_id = database.get_table(DbTable.CLIENT, fullname_new)[0][0]
+                logger.debug(old_client_id)
+                # plan_id = database.get_client_plan(DbTable.PLAN, old_client_id)
+
+            except exceptions.DbError as ex:
+                messagebox.showwarning(message=ex)
+
+        tk.Button(self, text="Передать тариф", width=30, command=transfer_plan).pack(pady=10)
 
         tk.Button(self, text="Назад", width=30, command=self.manager_clients_menu).pack(pady=20)
 
