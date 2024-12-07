@@ -1317,12 +1317,18 @@ class MainApplication(tk.Tk):
 
         def transfer_plan():
             fullname_old = fullname_old_var.get().strip()
-            # fullname_new = fullname_new_var.get().strip()
+            fullname_new = fullname_new_var.get().strip()
             try:
                 old_client_id = database.get_table(DbTable.CLIENT, fullname_old)[0][0]
-                # new_client_id = database.get_table(DbTable.CLIENT, fullname_new)[0][0]
+                new_client_id = database.get_table(DbTable.CLIENT, fullname_new)[0][0]
                 logger.debug(old_client_id)
-                # plan_id = database.get_client_plan(DbTable.PLAN, old_client_id)
+                plan_id = database.get_table(DbTable.CLIENT_PLAN, old_client_id)
+                logger.debug(plan_id)
+                database.delete_client_plan(old_client_id, plan_id)
+                database.set_client_plan(
+                    new_client_id,
+                    plan_id,
+                )
 
             except exceptions.DbError as ex:
                 messagebox.showwarning(message=ex)
