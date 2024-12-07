@@ -224,9 +224,7 @@ class MainApplication(tk.Tk):
         tk.Button(self, text="Подтвердить", width=30, command=confirm_name).pack(pady=10)
 
         # Кнопка "Назад"
-        tk.Button(self, text="Назад", width=30, command=self.admin_managers_choose_office).pack(
-            pady=10
-        )
+        tk.Button(self, text="Назад", width=30, command=self.admin_managers_menu).pack(pady=10)
 
     def admin_managers_delete(self):
         """
@@ -587,7 +585,7 @@ class MainApplication(tk.Tk):
             self,
             text="Назад",
             width=30,
-            command=lambda: self.admin_plans_choose_services(hall_name),
+            command=self.admin_plans_menu,
         ).pack(pady=10)
 
     def admin_plans_delete(self):
@@ -662,7 +660,7 @@ class MainApplication(tk.Tk):
         tk.Button(self, text="Удалить", width=30, command=confirm_delete).pack(pady=10)
 
         # Кнопка "Назад"
-        tk.Button(self, text="Назад", width=30, command=self.admin_plans_delete).pack(pady=10)
+        tk.Button(self, text="Назад", width=30, command=self.admin_plans_menu).pack(pady=10)
 
     # Просмотр
 
@@ -1020,7 +1018,7 @@ class MainApplication(tk.Tk):
     def manager_offices(self):
         self.clear_screen()
 
-        tk.Label(self, text="Выьерите зал для просмотра тарифов", font=("Arial", 24)).pack(pady=20)
+        tk.Label(self, text="Выберите зал для просмотра тарифов", font=("Arial", 24)).pack(pady=20)
 
         # Массив залов
         halls = database.get_table(DbTable.SPORTCENTER)
