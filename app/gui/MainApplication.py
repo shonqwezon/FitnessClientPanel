@@ -207,14 +207,19 @@ class MainApplication(tk.Tk):
             manager_name = name_var.get().strip()
             email = email_var.get().strip()
             password = password_var.get().strip()
-            if manager_name and email and password:
-                database.add_manager(
-                    manager_name, email, hash_string_sha256(password), int(hall_id)
-                )
-                messagebox.showinfo("Успех", f"Менеджер '{manager_name}' добавлен в {hall_name}.")
-                self.admin_managers_menu()
-            else:
-                messagebox.showwarning("Ошибка", "Введите имя менеджера.")
+            try:
+                if manager_name and email and password:
+                    database.add_manager(
+                        manager_name, email, hash_string_sha256(password), int(hall_id)
+                    )
+                    messagebox.showinfo(
+                        "Успех", f"Менеджер '{manager_name}' добавлен в {hall_name}."
+                    )
+                    self.admin_managers_menu()
+                else:
+                    messagebox.showwarning("Ошибка", "Введите имя менеджера.")
+            except exceptions.DbError as ex:
+                messagebox.showwarning(message=ex)
 
         tk.Button(self, text="Подтвердить", width=30, command=confirm_name).pack(pady=10)
 
