@@ -1292,7 +1292,7 @@ class MainApplication(tk.Tk):
                 database.add_client(fullname)
                 client_id = database.get_table(DbTable.CLIENT, fullname)[0][0]
                 database.update_balance(client_id, int(balance))
-
+                messagebox.showinfo(message="Клиент добавлен")
             except exceptions.DbError as ex:
                 messagebox.showwarning(message=ex)
             except Exception as ex:
@@ -1322,14 +1322,15 @@ class MainApplication(tk.Tk):
                 old_client_id = database.get_table(DbTable.CLIENT, fullname_old)[0][0]
                 new_client_id = database.get_table(DbTable.CLIENT, fullname_new)[0][0]
                 logger.debug(old_client_id)
-                plan_id = database.get_table(DbTable.CLIENT_PLAN, old_client_id)
-                logger.debug(plan_id)
-                database.delete_client_plan(old_client_id, plan_id)
+                plan = database.get_table(DbTable.CLIENT_PLAN, old_client_id)[0]
+                logger.debug(plan)
+                database.delete_client_plan(old_client_id, plan[0])
                 database.set_client_plan(
                     new_client_id,
-                    plan_id,
+                    plan[0],
+                    plan[2],
                 )
-
+                messagebox.showinfo(message="Тариф передан")
             except exceptions.DbError as ex:
                 messagebox.showwarning(message=ex)
 
