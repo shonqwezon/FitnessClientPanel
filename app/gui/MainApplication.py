@@ -161,7 +161,7 @@ class MainApplication(tk.Tk):
                 selected_id = halls[index][0]
                 self.admin_managers_input_name(halls[index][1], selected_id)
             except IndexError:
-                messagebox.showwarning("Ошибка", "Пожалуйста, выберите спортзал.")
+                messagebox.showwarning(message="Пожалуйста, выберите спортзал.")
 
         tk.Button(self, text="Подтвердить", width=30, command=confirm_hall).pack(pady=10)
 
@@ -213,11 +213,11 @@ class MainApplication(tk.Tk):
                         manager_name, email, hash_string_sha256(password), int(hall_id)
                     )
                     messagebox.showinfo(
-                        "Успех", f"Менеджер '{manager_name}' добавлен в {hall_name}."
+                        message=f"Менеджер '{manager_name}' добавлен в {hall_name}."
                     )
                     self.admin_managers_menu()
                 else:
-                    messagebox.showwarning("Ошибка", "Введите имя менеджера.")
+                    messagebox.showwarning(message="Введите имя менеджера.")
             except exceptions.DbError as ex:
                 messagebox.showwarning(message=ex)
 
@@ -246,12 +246,12 @@ class MainApplication(tk.Tk):
             try:
                 if manager_name:
                     database.delete_manager(manager_name)
-                    messagebox.showinfo("Успех", f"Менеджер '{manager_name}' удален.")
+                    messagebox.showinfo(message=f"Менеджер '{manager_name}' удален.")
                     self.admin_managers_menu()
                 else:
-                    messagebox.showwarning("Ошибка", "Введите имя менеджера.")
+                    messagebox.showwarning(message="Введите имя менеджера.")
             except exceptions.DbError as ex:
-                messagebox.showwarning("Ошибка", ex)
+                messagebox.showwarning(message=ex)
 
         tk.Button(self, text="Удалить", width=30, command=delete_manager).pack(pady=10)
 
@@ -306,13 +306,13 @@ class MainApplication(tk.Tk):
                 cost_ratio = office_cost_ratio.get()
 
                 database.add_sportcenter(name, address, open_time, close_time, cost_ratio)
-                messagebox.showinfo("Успех", f"Зал {name} добавлен")
+                messagebox.showinfo(message=f"Зал {name} добавлен")
                 self.admin_offices_menu()
 
             except exceptions.DbError as ex:
-                messagebox.showwarning(title="Ошибка", message=str(ex))
-            except Exception as ex:
-                messagebox.showwarning(title="Ошибка", message=str(ex))
+                messagebox.showwarning(message=str(ex))
+            except Exception:
+                messagebox.showwarning(message="Неизвестная ошибка")
 
         tk.Button(self, text="Добавить", width=30, command=admin_offices_add_confirm).pack(pady=5)
 
@@ -481,9 +481,9 @@ class MainApplication(tk.Tk):
                 hall_id = halls[index][0]
                 self.admin_plans_choose_services(halls[index][1], hall_id)
             except IndexError:
-                messagebox.showwarning("Ошибка", "Пожалуйста, выберите зал.")
+                messagebox.showwarning(message="Пожалуйста, выберите зал.")
             except exceptions.DbError as ex:
-                messagebox.showwarning(ex)
+                messagebox.showwarning(message=ex)
 
         tk.Button(self, text="Выбрать", width=30, command=confirm_hall).pack(pady=10)
 
@@ -521,7 +521,7 @@ class MainApplication(tk.Tk):
                     selected_services.append(services[index][0])
                 self.admin_plans_add_details(hall_name, hall_id, selected_services)
             else:
-                messagebox.showwarning("Ошибка", "Пожалуйста, выберите хотя бы одну услугу.")
+                messagebox.showwarning(message="Пожалуйста, выберите хотя бы одну услугу.")
 
         tk.Button(self, text="Выбрать", width=30, command=confirm_services).pack(pady=10)
 
@@ -561,7 +561,7 @@ class MainApplication(tk.Tk):
             end_time = end_time_var.get().strip()
 
             if not base_price or not start_time or not end_time:
-                messagebox.showwarning("Ошибка", "Пожалуйста, заполните все поля.")
+                messagebox.showwarning(message="Пожалуйста, заполните все поля.")
                 return
 
             try:
@@ -569,12 +569,11 @@ class MainApplication(tk.Tk):
                     int(base_price), start_time, end_time, hall_id, selected_services
                 )
                 messagebox.showinfo(
-                    "Успех",
-                    f"Тариф добавлен:\nЗал: {hall_name}\nВремя: {start_time} - {end_time}",
+                    message=f"Тариф добавлен:\nЗал: {hall_name}\nВремя: {start_time} - {end_time}",
                 )
                 self.admin_plans_menu()
             except exceptions.DbError as ex:
-                messagebox.showwarning(ex)
+                messagebox.showwarning(message=ex)
                 self.admin_plans_menu()
                 return
 
@@ -614,9 +613,9 @@ class MainApplication(tk.Tk):
                 hall_id = halls[index][0]
                 self.admin_plans_delete_choose_tariff(halls[index][1], hall_id)
             except exceptions.DbError as ex:
-                messagebox.showwarning(ex)
+                messagebox.showwarning(message=ex)
             except IndexError:
-                messagebox.showwarning("Ошибка", "Пожалуйста, выберите зал.")
+                messagebox.showwarning(message="Пожалуйста, выберите зал.")
 
         tk.Button(self, text="Выбрать", width=30, command=confirm_hall).pack(pady=10)
 
@@ -652,10 +651,10 @@ class MainApplication(tk.Tk):
                 selected_tariff_id = tariffs[index][0]
                 tariff_name = tariffs[index][1]
                 database.delete_plan(selected_tariff_id)
-                messagebox.showinfo("Успех", f"Тариф '{tariff_name}' из {hall_name} удален.")
+                messagebox.showinfo(message=f"Тариф '{tariff_name}' из {hall_name} удален.")
                 self.admin_plans_menu()
             except IndexError:
-                messagebox.showwarning("Ошибка", "Пожалуйста, выберите тариф для удаления.")
+                messagebox.showwarning(message="Пожалуйста, выберите тариф для удаления.")
 
         tk.Button(self, text="Удалить", width=30, command=confirm_delete).pack(pady=10)
 
@@ -1054,7 +1053,10 @@ class MainApplication(tk.Tk):
 
         try:
             office = database.get_table(DbTable.SPORTCENTER, office_id)[0]
-            tk.Label(self, text=str(office)).pack(pady=5)
+
+            text = f"Название: {office[1]}\nАдрес: {office[2]}"
+
+            tk.Label(self, text=text).pack(pady=5)
 
             tk.Label(self, text="Тарифы с выбранными услугами", font=("Arial", 24)).pack(pady=20)
             plans_db = database.get_table(DbTable.PLAN, office_id)
