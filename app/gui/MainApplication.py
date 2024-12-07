@@ -951,7 +951,7 @@ class MainApplication(tk.Tk):
         self.clear_screen()
 
         # Заголовок
-        tk.Label(self, text="Услуги для побдора тарифа", font=("Arial", 24)).pack(pady=20)
+        tk.Label(self, text="Услуги для подбора тарифа", font=("Arial", 24)).pack(pady=20)
 
         # Массив услуг
         services = database.get_table(DbTable.SERVICE)
@@ -979,6 +979,8 @@ class MainApplication(tk.Tk):
 
         tk.Button(self, text="Выбрать", width=30, command=confirm_services).pack(pady=10)
 
+        tk.Button(self, text="Назад", width=30, command=self.show_manager_menu).pack(pady=5)
+
     def manager_plan_get(self, services):
         self.clear_screen()
         logger.debug(services)
@@ -988,11 +990,11 @@ class MainApplication(tk.Tk):
         try:
             plans_db = database.get_table(DbTable.PLAN, services)
         except exceptions.DbError as ex:
-            messagebox.showwarning(ex)
+            messagebox.showwarning(message=ex)
             self.show_manager_menu()
             return
-        except Exception as ex:
-            messagebox.showwarning(ex)
+        except Exception:
+            messagebox.showwarning(message="Неизвестная ошибка")
             self.show_manager_menu()
             return
 
@@ -1042,9 +1044,11 @@ class MainApplication(tk.Tk):
 
                 self.manager_plans_for_office(selected_id)
             except IndexError:
-                messagebox.showwarning("Ошибка", "Пожалуйста, выберите спортзал.")
+                messagebox.showwarning(message="Пожалуйста, выберите спортзал.")
 
         tk.Button(self, text="Выбрать", width=30, command=choose_office).pack(pady=10)
+
+        tk.Button(self, text="Назад", width=30, command=self.show_manager_menu).pack(pady=5)
 
     def manager_plans_for_office(self, office_id):
         self.clear_screen()
@@ -1058,10 +1062,10 @@ class MainApplication(tk.Tk):
             plans_db = database.get_table(DbTable.PLAN, office_id)
             logger.debug(plans_db)
         except exceptions.DbError as ex:
-            messagebox.showwarning(ex)
+            messagebox.showwarning(message=ex)
             self.show_manager_menu()
-        except Exception as ex:
-            messagebox.showwarning(ex)
+        except Exception:
+            messagebox.showwarning(message="Неизвестная ошибка")
             self.show_manager_menu()
 
         logger.debug(plans_db)
