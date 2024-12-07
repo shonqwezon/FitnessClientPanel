@@ -344,7 +344,7 @@ class MainApplication(tk.Tk):
 
                 # Удаляем спортзал по ID
                 database.delete_sportcenter(selected_id)
-                messagebox.showinfo("Спортцентр удален")
+                messagebox.showinfo(message="Спортцентр удален")
                 self.admin_offices_menu()
             except IndexError:
                 messagebox.showwarning("Ошибка", "Пожалуйста, выберите спортзал.")
@@ -423,7 +423,7 @@ class MainApplication(tk.Tk):
 
                 selected_id = services[index][0]
                 database.delete_service(int(selected_id))
-                messagebox.showinfo("Услуга удалена")
+                messagebox.showinfo(message="Услуга удалена")
 
                 self.admin_services_menu()
             except exceptions.DbError as ex:
