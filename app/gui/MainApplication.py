@@ -390,15 +390,15 @@ class MainApplication(tk.Tk):
             cost = cost_var.get()
             try:
                 if service and cost.isdigit():
-                    messagebox.showinfo("Успех", f"Услуга '{service}' добавлена.")
-
                     database.add_service(service, int(cost))
+
+                    messagebox.showinfo(message=f"Услуга '{service}' добавлена.")
 
                     self.admin_services_menu()
                 else:
-                    messagebox.showwarning("Ошибка", "Введите название услуги.")
+                    messagebox.showwarning(message="Введите название услуги.")
             except exceptions.DbError as ex:
-                messagebox.showwarning("Oшибка", ex)
+                messagebox.showwarning(message=ex)
 
         tk.Button(self, text="Подтвердить", width=30, command=confirm_service).pack(pady=10)
 
