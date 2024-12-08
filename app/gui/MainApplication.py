@@ -829,7 +829,7 @@ class MainApplication(tk.Tk):
         self.create_table(columns, services)
 
         def delete_table_from_db():
-            database.drop_table(DbTable.SPORTCENTER)
+            database.drop_table(DbTable.SERVICE)
             messagebox.showinfo("Удаление", "Таблица услуг успешно удалена.")
             self.quit()
 
@@ -868,7 +868,7 @@ class MainApplication(tk.Tk):
         self.create_table(columns, clients)
 
         def delete_table_from_db():
-            database.drop_table(DbTable.SPORTCENTER)
+            database.drop_table(DbTable.CLIENT)
             messagebox.showinfo("Удаление", "Таблица клиентов успешно удалена.")
             self.quit()
 
