@@ -679,7 +679,7 @@ class MainApplication(tk.Tk):
         tk.Button(self, text="Залы", width=30, command=self.admin_view_halls).pack(pady=5)
         tk.Button(self, text="Услуги", width=30, command=self.admin_view_services).pack(pady=5)
         tk.Button(self, text="Клиенты", width=30, command=self.admin_view_clients).pack(pady=5)
-        tk.Button(self, text="Тарифа", width=30, command=self.admin_view_clients).pack(pady=5)
+        tk.Button(self, text="Тарифы", width=30, command=self.admin_view_plans).pack(pady=5)
 
         tk.Button(self, text="Назад", width=30, command=self.show_admin_menu).pack(pady=5)
 
@@ -876,6 +876,46 @@ class MainApplication(tk.Tk):
         ).pack(pady=10)
 
         # Кнопка "Назад"
+        tk.Button(self, text="Назад", width=30, command=self.admin_view_menu).pack(pady=10)
+
+    def admin_view_plans(self):
+        self.clear_screen()
+
+        tk.Label(self, text="Тарифы", font=("Arial", 24)).pack(pady=20)
+
+        try:
+            plans_db = database.get_table(DbTable.PLAN_TECH)
+        except exceptions.DbError as ex:
+            messagebox.showwarning(message=ex)
+            self.admin_view_menu()
+            return
+        logger.debug(plans_db)
+
+        plans = [
+            {
+                "Название": plan[1],
+                # "Коэффицент стоимости": plan[2],
+                "Базовая стоимость": plan[3],
+                "Время": f"{plan[4]} - {plan[5]}",
+            }
+            for plan in plans_db
+        ]
+
+        columns = ["Название", "Базовая стоимость", "Время"]
+        self.create_table(columns, plans)
+
+        def delete_table_from_db():
+            database.drop_table(DbTable.PLAN)
+            messagebox.showinfo("Удаление", "Таблица тарифов успешно удалена.")
+            self.quit()
+
+        tk.Button(
+            self,
+            text="Удалить таблицу",
+            width=30,
+            command=delete_table_from_db,
+        ).pack(pady=10)
+
         tk.Button(self, text="Назад", width=30, command=self.admin_view_menu).pack(pady=10)
 
     # удаление всего
