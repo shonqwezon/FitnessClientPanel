@@ -1,5 +1,6 @@
 CREATE OR REPLACE FUNCTION app.get_plan_tech(in_sportcenter_id INTEGER DEFAULT NULL)
 RETURNS TABLE (id INTEGER,
+                name VARCHAR(50),
                 sportcenter_id INTEGER,
                 base_cost NUMERIC(8, 2),
                 begin_time TIME,
@@ -9,6 +10,7 @@ SECURITY DEFINER
 AS $$
 BEGIN
     RETURN QUERY SELECT p.id,
+                        p.name,
                         p.sportcenter_id,
                         p.base_cost,
                         p.begin_time,

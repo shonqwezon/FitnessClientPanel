@@ -1,5 +1,6 @@
 CREATE TABLE IF NOT EXISTS plan (
     id SERIAL PRIMARY KEY,
+    name VARCHAR(50) UNIQUE NOT NULL,
     base_cost NUMERIC(8, 2) NOT NULL,
     begin_time TIME NOT NULL,
     end_time TIME NOT NULL,

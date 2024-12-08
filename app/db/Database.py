@@ -457,6 +457,7 @@ class Database:
 
     def add_plan(
         self,
+        name: str,
         base_cost: int,
         begin_time: time,
         end_time: time,
@@ -468,12 +469,16 @@ class Database:
             with conn.cursor() as cursor:
                 try:
                     cursor.execute(
-                        "call add_plan(%s, %s, %s, %s, %s)",
-                        (base_cost, begin_time, end_time, sportcenter_id, service_ids),
+                        "call add_plan(%s, %s, %s, %s, %s, %s)",
+                        (name, base_cost, begin_time, end_time, sportcenter_id, service_ids),
                     )
                 except Exception as e:
                     logger.error(e.pgerror)
                     match e.pgcode:
+                        case PgError.TOO_LONG:
+                            raise TooLongError("Слишком длинное название тарифа")
+                        case PgError.UNIQUE:
+                            raise UniqueError(f"Тариф с названием '{name}' уже сущуствует")
                         case PgError.FK:
                             raise FKError("Указанные id услуг не существуют")
                         case PgError.CHECK:
