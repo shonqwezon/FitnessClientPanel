@@ -640,13 +640,15 @@ class MainApplication(tk.Tk):
         # Массив тарифов
         try:
             tariffs = database.get_table(DbTable.PLAN_TECH, hall_id)
+            logger.debug(tariffs)
+            plans = [plan[1] for plan in tariffs]
         except exceptions.DbError as ex:
             messagebox.showwarning(message=ex)
             self.admin_plans_menu()
             return
         # Список тарифов
         tariff_list = tk.Listbox(
-            self, listvariable=tk.StringVar(value=tariffs), height=len(tariffs), width=50
+            self, listvariable=tk.StringVar(value=plans), height=len(plans), width=20
         )
         tariff_list.pack(pady=10)
 
@@ -1243,9 +1245,11 @@ class MainApplication(tk.Tk):
 
         tk.Label(self, text="Информация о клиенте", font=("Arial", 24)).pack(pady=20)
 
-        text = ""
-        for i in range(1, len(client)):
-            text += str(client[i]) + "  "
+        # text = ""
+        # for i in range(1, len(client)):
+        #     text += str(client[i]) + "  "
+
+        text = f"ФИО: {client[1]}\nБаланс: {client[2]}"
 
         tk.Label(self, text=text).pack(pady=5)
 
