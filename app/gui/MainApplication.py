@@ -1039,6 +1039,7 @@ class MainApplication(tk.Tk):
 
         try:
             plans_db = database.get_table(DbTable.PLAN, services)
+            logger.debug(plans_db)
         except exceptions.DbError as ex:
             messagebox.showwarning(message=ex)
             self.show_manager_menu()
@@ -1051,18 +1052,27 @@ class MainApplication(tk.Tk):
         logger.debug(plans_db)
         plans = [
             {
-                "Стоимость за месяц": service[1],
-                "Начало": service[2],
-                "Окончание": service[3],
-                "Услуги": "; ".join(service[4]),
-                "Зал": service[5],
-                "Адрес": service[6],
+                "Название": service[1],
+                "Стоимость за месяц": service[2],
+                "Начало": service[3],
+                "Окончание": service[4],
+                "Услуги": "; ".join(service[5]),
+                "Зал": service[6],
+                "Адрес": service[7],
             }
             for service in plans_db
         ]
 
         # Создаем таблицу
-        columns = ["Стоимость за месяц", "Начало", "Окончание", "Услуги", "Зал", "Адрес"]
+        columns = [
+            "Название",
+            "Стоимость за месяц",
+            "Начало",
+            "Окончание",
+            "Услуги",
+            "Зал",
+            "Адрес",
+        ]
         self.create_table(columns, plans)
 
         tk.Button(self, text="Назад", width=30, command=self.show_manager_menu).pack(pady=10)
@@ -1124,16 +1134,17 @@ class MainApplication(tk.Tk):
         logger.debug(plans_db)
         plans = [
             {
-                "Стоимость за месяц": plan[1],
-                "Начало": plan[2],
-                "Окончание": plan[3],
-                "Услуги": "; ".join(plan[4]),
+                "Название": plan[1],
+                "Стоимость за месяц": plan[2],
+                "Начало": plan[3],
+                "Окончание": plan[4],
+                "Услуги": "; ".join(plan[5]),
             }
             for plan in plans_db
         ]
 
         # Создаем таблицу
-        columns = ["Стоимость за месяц", "Начало", "Окончание", "Услуги"]
+        columns = ["Название", "Стоимость за месяц", "Начало", "Окончание", "Услуги"]
         self.create_table(columns, plans)
 
         tk.Button(self, text="Назад", width=30, command=self.show_manager_menu).pack(pady=10)
