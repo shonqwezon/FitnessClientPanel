@@ -542,6 +542,10 @@ class MainApplication(tk.Tk):
 
         # tk.Label(self, text=f"Выбранные услуги: {', '.join(selected_services)}").pack(pady=10)
 
+        tk.Label(self, text="Название тарифа:").pack(pady=5)
+        name_var = tk.StringVar()
+        tk.Entry(self, textvariable=name_var).pack(pady=5)
+
         # Поля для ввода параметров
         tk.Label(self, text="Базовая цена (за день):").pack(pady=5)
         base_price_var = tk.StringVar()
@@ -557,18 +561,22 @@ class MainApplication(tk.Tk):
 
         # Кнопка "Добавить"
         def confirm_details():
+            name = name_var.get().strip()
             base_price = base_price_var.get().strip()
             start_time = start_time_var.get().strip()
             end_time = end_time_var.get().strip()
 
-            if not base_price or not start_time or not end_time:
+            if not base_price or not start_time or not end_time or not name:
                 messagebox.showwarning(message="Пожалуйста, заполните все поля.")
                 return
 
             try:
-                database.add_plan(base_price, start_time, end_time, hall_id, selected_services)
+                database.add_plan(
+                    name, base_price, start_time, end_time, hall_id, selected_services
+                )
                 messagebox.showinfo(
-                    message=f"Тариф добавлен:\nЗал: {hall_name}\nВремя: {start_time} - {end_time}",
+                    message=f"Тариф {name} добавлен:\nЗал: {hall_name}\nВремя:\
+{start_time} - {end_time}",
                 )
                 self.admin_plans_menu()
             except exceptions.DbError as ex:
@@ -671,6 +679,7 @@ class MainApplication(tk.Tk):
         tk.Button(self, text="Залы", width=30, command=self.admin_view_halls).pack(pady=5)
         tk.Button(self, text="Услуги", width=30, command=self.admin_view_services).pack(pady=5)
         tk.Button(self, text="Клиенты", width=30, command=self.admin_view_clients).pack(pady=5)
+        tk.Button(self, text="Тарифа", width=30, command=self.admin_view_clients).pack(pady=5)
 
         tk.Button(self, text="Назад", width=30, command=self.show_admin_menu).pack(pady=5)
 
