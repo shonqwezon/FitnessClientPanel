@@ -171,19 +171,25 @@ class Database:
 
     # Client
 
-    def add_client(self, fullname: str):
+    def add_client(self, fullname: str, balance: int):
         logger.debug("add_client")
         with self.pool.get_connection() as conn:
             with conn.cursor() as cursor:
                 try:
-                    cursor.execute("call add_client(%s)", (fullname,))
+                    cursor.execute("call add_client(%s, %s)", (fullname, balance))
                 except Exception as e:
                     logger.error(e.pgerror)
                     match e.pgcode:
                         case PgError.TOO_LONG:
                             raise TooLongError("Слишком длинное ФИО")
                         case PgError.UNIQUE:
-                            raise UniqueError("Такое ФИО уже было зарегистрировано")
+                            raise UniqueError("Такой клиент уже зарегистрирован")
+                        case PgError.CONVERT:
+                            raise ConvertError("Неверный формат баланса")
+                        case PgError.CHECK:
+                            raise CheckError("Баланс не может быть отрицательным")
+                        case PgError.NUMERIC:
+                            raise NumericError("Ожидался new_balance с точностью 8, порядка 2")
                         case _:
                             raise UnknownError()
 
@@ -197,9 +203,7 @@ class Database:
                     logger.error(e.pgerror)
                     match e.pgcode:
                         case PgError.NOQUERY | PgError.RAISE:
-                            raise FKError(
-                                "Указанного клиента или спортивного центра не существует"
-                            )
+                            raise FKError("Указанного клиента не существует")
                         case PgError.CONVERT:
                             raise ConvertError("Неверный формат данных (времени или числа)")
                         case PgError.CHECK:
@@ -222,10 +226,19 @@ class Database:
                             raise FKError(
                                 "Указанного клиента или спортивного центра не существует"
                             )
+                        case (
+                            PgError.ARIFMETIC
+                            | PgError.WRONGTIME
+                            | PgError.NUMERIC
+                            | PgError.DATETIME
+                        ):
+                            raise CheckError("Выбрана некорректная дата окончания тарифа")
                         case PgError.CHECK:
                             raise CheckError(
                                 "У клиента недостаточно средств или некорректный plan_end"
                             )
+                        case PgError.UNIQUE:
+                            raise UniqueError("Клиент уже имеет данный тариф")
                         case _:
                             raise UnknownError()
 
@@ -245,6 +258,50 @@ class Database:
                             raise ConvertError(
                                 "Неверный формат client_id или plan_id, ожидалось число"
                             )
+                        case PgError.ARIFMETIC:
+                            raise CheckError("Выбрана некорректная дата окончания тарифа")
+                        case _:
+                            raise UnknownError()
+
+    def change_client_plan(
+        self, client_id: int, plan_id: int, plan_end: date, new_client_id: int = None
+    ):
+        logger.debug("change_client_plan")
+        with self.pool.get_connection() as conn:
+            conn.autocommit = False
+            with conn.cursor() as cursor:
+                try:
+                    cursor.callproc("delete_client_plan", [client_id, plan_id])
+                    if new_client_id:
+                        client_id = new_client_id
+                    cursor.execute("call set_plan(%s, %s, %s)", (client_id, plan_id, plan_end))
+                    conn.commit()
+                except Exception as e:
+                    logger.error(e.pgerror)
+                    match e.pgcode:
+                        case PgError.RAISE:
+                            raise FKError("Указанного клиента или плана не существует")
+                        case PgError.CONVERT:
+                            raise ConvertError(
+                                "Неверный формат client_id или plan_id, ожидалось число"
+                            )
+                        case (
+                            PgError.ARIFMETIC
+                            | PgError.WRONGTIME
+                            | PgError.NUMERIC
+                            | PgError.DATETIME
+                        ):
+                            raise CheckError("Выбрана некорректная дата окончания тарифа")
+                        case PgError.NOQUERY | PgError.FK:
+                            raise FKError(
+                                "Указанного клиента или спортивного центра не существует"
+                            )
+                        case PgError.CHECK:
+                            raise CheckError(
+                                "У клиента недостаточно средств или некорректный plan_end"
+                            )
+                        case PgError.UNIQUE:
+                            raise UniqueError("Клиент уже имеет данный тариф")
                         case _:
                             raise UnknownError()
 
@@ -328,7 +385,9 @@ class Database:
                         case PgError.TOO_LONG:
                             raise TooLongError("Слишком длинное название центра или его адреса")
                         case PgError.UNIQUE:
-                            raise UniqueError(f"Спортивный с name={name} центр уже сущуствует")
+                            raise UniqueError(
+                                f"Спортивный центр с name={name} центр уже сущуствует"
+                            )
                         case PgError.NUMERIC:
                             raise NumericError("Ожидалось cost_ratio с точностью 3, порядка 2")
                         case PgError.CHECK:
@@ -419,11 +478,11 @@ class Database:
                             raise FKError("Указанные id услуг не существуют")
                         case PgError.CHECK:
                             raise CheckError("Нарушено ограничение таблицы")
-                        case PgError.CONVERT:
+                        case PgError.CONVERT | PgError.WRONGTIME | PgError.DATETIME:
                             raise ConvertError("Неверный формат данных (времени или id)")
                         case PgError.RAISE:
                             raise CheckError(
-                                "Временные рамки плана\
+                                "Временные рамки плана \
 не должны выходить за рабочие часы спортивного центра"
                             )
                         case _:

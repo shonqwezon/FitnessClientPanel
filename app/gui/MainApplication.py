@@ -1,11 +1,11 @@
 import hashlib
 import tkinter as tk
+from datetime import date
 from tkinter import messagebox, ttk
 
 from app import setup_logger
 from app.db import database, exceptions
 from app.db.config import DbTable
-from datetime import date
 
 logger = setup_logger(__name__)
 
@@ -16,7 +16,7 @@ class MainApplication(tk.Tk):
     def __init__(self):
         super().__init__()
         self.title("Fitness Client Panel")
-        self.geometry("800x600")  # Устанавливаем начальный размер
+        self.geometry("1200x600")  # Устанавливаем начальный размер
         self.user_data = {
             "username": None,
             "role": None,
@@ -76,9 +76,10 @@ class MainApplication(tk.Tk):
                 self.user_data["role"] = "admin"
                 self.show_admin_menu()
             elif database.is_correct_manager(login, hash_string_sha256(password)):
-                self.user_data["username"] = login
+                manager = database.get_table(DbTable.MANAGER)[0]
+                self.user_data["username"] = manager[0]
                 self.user_data["role"] = "manager"
-                self.user_data["sportcenter_id"] = database.get_table(DbTable.MANAGER)[0][3]
+                self.user_data["sportcenter_id"] = manager[3]
                 self.show_manager_menu()
             else:
                 error_label.config(text="Неверный логин или пароль")
@@ -380,7 +381,7 @@ class MainApplication(tk.Tk):
         tk.Entry(self, textvariable=name_var).pack(pady=10)
 
         # Поле для ввода cost
-        tk.Label(self, text="Введите стоимость услуги:").pack(pady=5)
+        tk.Label(self, text="Введите стоимость услуги за час:").pack(pady=5)
         cost_var = tk.StringVar()
         tk.Entry(self, textvariable=cost_var).pack(pady=10)
 
@@ -542,7 +543,7 @@ class MainApplication(tk.Tk):
         # tk.Label(self, text=f"Выбранные услуги: {', '.join(selected_services)}").pack(pady=10)
 
         # Поля для ввода параметров
-        tk.Label(self, text="Базовая цена:").pack(pady=5)
+        tk.Label(self, text="Базовая цена (за день):").pack(pady=5)
         base_price_var = tk.StringVar()
         tk.Entry(self, textvariable=base_price_var).pack(pady=5)
 
@@ -565,16 +566,13 @@ class MainApplication(tk.Tk):
                 return
 
             try:
-                database.add_plan(
-                    int(base_price), start_time, end_time, hall_id, selected_services
-                )
+                database.add_plan(base_price, start_time, end_time, hall_id, selected_services)
                 messagebox.showinfo(
                     message=f"Тариф добавлен:\nЗал: {hall_name}\nВремя: {start_time} - {end_time}",
                 )
                 self.admin_plans_menu()
             except exceptions.DbError as ex:
                 messagebox.showwarning(message=ex)
-                self.admin_plans_menu()
                 return
 
         tk.Button(self, text="Добавить", width=30, command=confirm_details).pack(pady=10)
@@ -633,7 +631,7 @@ class MainApplication(tk.Tk):
 
         # Массив тарифов
         try:
-            tariffs = database.get_table(DbTable.PLAN, hall_id)
+            tariffs = database.get_table(DbTable.PLAN_TECH, hall_id)
         except exceptions.DbError as ex:
             messagebox.showwarning(message=ex)
             self.admin_plans_menu()
@@ -808,10 +806,12 @@ class MainApplication(tk.Tk):
             self.admin_view_menu()
             return
         logger.debug(services_db)
-        services = [{"Услуга": service[1], "Стоимость": service[2]} for service in services_db]
+        services = [
+            {"Услуга": service[1], "Стоимость за час": service[2]} for service in services_db
+        ]
 
         # Создаем таблицу
-        columns = ["Услуга", "Стоимость"]
+        columns = ["Услуга", "Стоимость за час"]
         self.create_table(columns, services)
 
         def delete_table_from_db():
@@ -935,10 +935,12 @@ class MainApplication(tk.Tk):
             self.show_manager_menu()
             return
         logger.debug(services_db)
-        services = [{"Услуга": service[1], "Стоимость": service[2]} for service in services_db]
+        services = [
+            {"Услуга": service[1], "Стоимость за час": service[2]} for service in services_db
+        ]
 
         # Создаем таблицу
-        columns = ["Услуга", "Стоимость"]
+        columns = ["Услуга", "Стоимость за час"]
         self.create_table(columns, services)
 
         tk.Button(self, text="Назад", width=30, command=self.show_manager_menu).pack(pady=5)
@@ -998,10 +1000,10 @@ class MainApplication(tk.Tk):
         logger.debug(plans_db)
         plans = [
             {
-                "Стоимость": service[1],
+                "Стоимость за месяц": service[1],
                 "Начало": service[2],
                 "Окончание": service[3],
-                "Услуги": service[4],
+                "Услуги": "; ".join(service[4]),
                 "Зал": service[5],
                 "Адрес": service[6],
             }
@@ -1009,7 +1011,7 @@ class MainApplication(tk.Tk):
         ]
 
         # Создаем таблицу
-        columns = ["Стоимость", "Начало", "Окончание", "Услуги", "Зал", "Адрес"]
+        columns = ["Стоимость за месяц", "Начало", "Окончание", "Услуги", "Зал", "Адрес"]
         self.create_table(columns, plans)
 
         tk.Button(self, text="Назад", width=30, command=self.show_manager_menu).pack(pady=10)
@@ -1071,16 +1073,16 @@ class MainApplication(tk.Tk):
         logger.debug(plans_db)
         plans = [
             {
-                "Стоимость": plan[1],
+                "Стоимость за месяц": plan[1],
                 "Начало": plan[2],
                 "Окончание": plan[3],
-                "Услуги": plan[4],
+                "Услуги": "; ".join(plan[4]),
             }
             for plan in plans_db
         ]
 
         # Создаем таблицу
-        columns = ["Стоимость", "Начало", "Окончание", "Услуги"]
+        columns = ["Стоимость за месяц", "Начало", "Окончание", "Услуги"]
         self.create_table(columns, plans)
 
         tk.Button(self, text="Назад", width=30, command=self.show_manager_menu).pack(pady=10)
@@ -1143,15 +1145,16 @@ class MainApplication(tk.Tk):
 
         def change_plan():
             try:
+                if not plan_list.curselection():
+                    messagebox.showwarning(message="Не выбран тариф")
+                    return
                 index = plan_list.curselection()[0]
-                plan_id = int(plans[index][0])
+                plan_id = plans[index][0]
                 fullname = fullname_var.get().strip()
-                day, month, year = date_var.get().split(".")
-                end_date = date(int(year), int(month), int(day))
 
                 client = database.get_table(DbTable.CLIENT, fullname)[0]
                 logger.debug(client)
-                database.set_client_plan(client[0], plan_id, end_date)
+                database.set_client_plan(client[0], plan_id, date_var.get())
                 messagebox.showinfo(message="Тариф добавлен")
             except exceptions.DbError as ex:
                 messagebox.showwarning(message=ex)
@@ -1262,16 +1265,16 @@ class MainApplication(tk.Tk):
 
         def change_plan():
             try:
+                if not plan_list.curselection():
+                    messagebox.showwarning(message="Не выбран тариф")
+                    return
                 index = plan_list.curselection()[0]
-                plan_id = int(plans[index][0])
+                plan_id = plans[index][0]
                 fullname = fullname_var.get().strip()
-                day, month, year = date_var.get().split(".")
-                end_date = date(int(year), int(month), int(day))
 
                 client = database.get_table(DbTable.CLIENT, fullname)[0]
                 logger.debug(client)
-                database.delete_client_plan(client[0], plan_id)
-                database.set_client_plan(client[0], plan_id, end_date)
+                database.change_client_plan(client[0], plan_id, date_var.get())
                 messagebox.showinfo(message="Тариф изменен")
             except exceptions.DbError as ex:
                 messagebox.showwarning(message=ex)
@@ -1300,9 +1303,7 @@ class MainApplication(tk.Tk):
             balance = balance_var.get().strip()
 
             try:
-                database.add_client(fullname)
-                client_id = database.get_table(DbTable.CLIENT, fullname)[0][0]
-                database.update_balance(client_id, int(balance))
+                database.add_client(fullname, balance)
                 messagebox.showinfo(message="Клиент добавлен")
             except exceptions.DbError as ex:
                 messagebox.showwarning(message=ex)
@@ -1335,12 +1336,7 @@ class MainApplication(tk.Tk):
                 logger.debug(old_client_id)
                 plan = database.get_table(DbTable.CLIENT_PLAN, old_client_id)[0]
                 logger.debug(plan)
-                database.delete_client_plan(old_client_id, plan[0])
-                database.set_client_plan(
-                    new_client_id,
-                    plan[0],
-                    plan[2],
-                )
+                database.change_client_plan(old_client_id, plan[0], plan[2], new_client_id)
                 messagebox.showinfo(message="Тариф передан")
             except exceptions.DbError as ex:
                 messagebox.showwarning(message=ex)
