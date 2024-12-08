@@ -16,7 +16,7 @@ class MainApplication(tk.Tk):
     def __init__(self):
         super().__init__()
         self.title("Fitness Client Panel")
-        self.geometry("1200x600")  # Устанавливаем начальный размер
+        self.geometry("1400x600")  # Устанавливаем начальный размер
         self.user_data = {
             "username": None,
             "role": None,
@@ -209,16 +209,19 @@ class MainApplication(tk.Tk):
             email = email_var.get().strip()
             password = password_var.get().strip()
             try:
-                if manager_name and email and password:
-                    database.add_manager(
-                        manager_name, email, hash_string_sha256(password), int(hall_id)
-                    )
-                    messagebox.showinfo(
-                        message=f"Менеджер '{manager_name}' добавлен в {hall_name}."
-                    )
-                    self.admin_managers_menu()
-                else:
+                if not manager_name:
                     messagebox.showwarning(message="Введите имя менеджера.")
+                    return
+                if not email:
+                    messagebox.showwarning(message="Введите email менеджера.")
+                    return
+                if not password:
+                    messagebox.showwarning(message="Введите пароль менеджера.")
+                    return
+                database.add_manager(manager_name, email, hash_string_sha256(password), hall_id)
+                messagebox.showinfo(message=f"Менеджер '{manager_name}' добавлен в {hall_name}.")
+                self.admin_managers_menu()
+
             except exceptions.DbError as ex:
                 messagebox.showwarning(message=ex)
 
@@ -390,8 +393,8 @@ class MainApplication(tk.Tk):
             service = name_var.get().strip()
             cost = cost_var.get()
             try:
-                if service and cost.isdigit():
-                    database.add_service(service, int(cost))
+                if service:
+                    database.add_service(service, cost)
 
                     messagebox.showinfo(message=f"Услуга '{service}' добавлена.")
 
@@ -426,7 +429,7 @@ class MainApplication(tk.Tk):
                 index = services_list.curselection()[0]
 
                 selected_id = services[index][0]
-                database.delete_service(int(selected_id))
+                database.delete_service(selected_id)
                 messagebox.showinfo(message="Услуга удалена")
 
                 self.admin_services_menu()
@@ -896,14 +899,15 @@ class MainApplication(tk.Tk):
         plans = [
             {
                 "Название": plan[1],
-                # "Коэффицент стоимости": plan[2],
+                "Спортцентер": plan[2],
                 "Базовая стоимость": plan[3],
                 "Время": f"{plan[4]} - {plan[5]}",
+                "Создан": plan[6].strftime("%Y-%m-%d %H:%M:%S"),
             }
             for plan in plans_db
         ]
 
-        columns = ["Название", "Базовая стоимость", "Время"]
+        columns = ["Название", "Спортцентер", "Базовая стоимость", "Время", "Создан"]
         self.create_table(columns, plans)
 
         def delete_table_from_db():
@@ -1213,6 +1217,9 @@ class MainApplication(tk.Tk):
                 index = plan_list.curselection()[0]
                 plan_id = plans[index][0]
                 fullname = fullname_var.get().strip()
+                if not fullname:
+                    messagebox.showwarning(message="Введите имя клиента")
+                    return
 
                 client = database.get_table(DbTable.CLIENT, fullname)[0]
                 logger.debug(client)
@@ -1244,16 +1251,16 @@ class MainApplication(tk.Tk):
         tk.Button(self, text="Назад", width=30, command=self.manager_clients_menu).pack(pady=20)
 
     def manager_clients_client_info(self, fullname):
-        self.clear_screen()
-
+        if not fullname:
+            messagebox.showwarning(message="Введите имя клиента")
+            return
         try:
             client = database.get_table(DbTable.CLIENT, fullname)[0]
             logger.debug(client)
         except exceptions.DbError as ex:
             messagebox.showwarning(message=ex)
-            self.manager_clients_menu()
             return
-
+        self.clear_screen()
         tk.Label(self, text="Информация о клиенте", font=("Arial", 24)).pack(pady=20)
 
         # text = ""
@@ -1335,6 +1342,9 @@ class MainApplication(tk.Tk):
                 index = plan_list.curselection()[0]
                 plan_id = plans[index][0]
                 fullname = fullname_var.get().strip()
+                if not fullname:
+                    messagebox.showwarning(message="Введите имя клиента")
+                    return
 
                 client = database.get_table(DbTable.CLIENT, fullname)[0]
                 logger.debug(client)
@@ -1394,6 +1404,9 @@ class MainApplication(tk.Tk):
         def transfer_plan():
             fullname_old = fullname_old_var.get().strip()
             fullname_new = fullname_new_var.get().strip()
+            if not (fullname_old and fullname_new):
+                messagebox.showwarning(message="Заполните все поля!")
+                return
             try:
                 old_client_id = database.get_table(DbTable.CLIENT, fullname_old)[0][0]
                 new_client_id = database.get_table(DbTable.CLIENT, fullname_new)[0][0]

@@ -10,7 +10,13 @@ RETURNS TABLE (id INTEGER,
 SECURITY DEFINER
 AS $$
 BEGIN
-    RETURN QUERY SELECT p.id,
+    RETURN QUERY
+            WITH matching_plans AS (
+                    SELECT DISTINCT ps.plan_id
+                    FROM plan_service ps
+                    WHERE ps.service_id = ANY(service_ids)
+                )
+                SELECT p.id,
                         p.name,
                         app.calculate_plan_cost(p.id) * 30 AS cost_per_month,
                         p.begin_time,
@@ -21,7 +27,7 @@ BEGIN
                 FROM plan AS p
                 JOIN plan_service ps ON ps.plan_id = p.id
                 JOIN service s ON s.id = ps.service_id
-                WHERE ps.service_id = ANY(service_ids)
+                JOIN matching_plans mp ON mp.plan_id = p.id
                 GROUP BY p.id;
     IF NOT FOUND THEN
         RAISE EXCEPTION 'Plans with services_ids "%" for manager do not exist', service_ids;

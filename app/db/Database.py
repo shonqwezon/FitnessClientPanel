@@ -187,7 +187,7 @@ class Database:
                         case PgError.CONVERT:
                             raise ConvertError("Неверный формат баланса")
                         case PgError.CHECK:
-                            raise CheckError("Баланс не может быть отрицательным")
+                            raise CheckError("Проверьте баланс и/или Имя клиента")
                         case PgError.NUMERIC:
                             raise NumericError("Ожидался new_balance с точностью 8, порядка 2")
                         case _:
@@ -242,27 +242,6 @@ class Database:
                         case _:
                             raise UnknownError()
 
-    def delete_client_plan(self, client_id: int, plan_id: int) -> date:
-        logger.debug("delete_client_plan")
-        with self.pool.get_connection() as conn:
-            with conn.cursor() as cursor:
-                try:
-                    cursor.callproc("delete_client_plan", [client_id, plan_id])
-                    return cursor.fetchone()[0]
-                except Exception as e:
-                    logger.error(e.pgerror)
-                    match e.pgcode:
-                        case PgError.RAISE:
-                            raise FKError("Указанного клиента или плана не существует")
-                        case PgError.CONVERT:
-                            raise ConvertError(
-                                "Неверный формат client_id или plan_id, ожидалось число"
-                            )
-                        case PgError.ARIFMETIC:
-                            raise CheckError("Выбрана некорректная дата окончания тарифа")
-                        case _:
-                            raise UnknownError()
-
     def change_client_plan(
         self, client_id: int, plan_id: int, plan_end: date, new_client_id: int = None
     ):
@@ -271,7 +250,7 @@ class Database:
             conn.autocommit = False
             with conn.cursor() as cursor:
                 try:
-                    cursor.callproc("delete_client_plan", [client_id, plan_id])
+                    cursor.callproc("delete_client_plan", [client_id])
                     if new_client_id:
                         client_id = new_client_id
                     cursor.execute("call set_plan(%s, %s, %s)", (client_id, plan_id, plan_end))
@@ -392,7 +371,7 @@ class Database:
                             raise NumericError("Ожидалось cost_ratio с точностью 3, порядка 2")
                         case PgError.CHECK:
                             raise CheckError("Нарушено ограничение таблицы")
-                        case PgError.CONVERT | PgError.WRONGTIME:
+                        case PgError.CONVERT | PgError.WRONGTIME | PgError.DATETIME:
                             raise ConvertError("Неверный формат данных (времени или числа)")
                         case _:
                             raise UnknownError()
