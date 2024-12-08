@@ -26,6 +26,7 @@ class DbTable(StrEnum):
     SERVICE = "service"
     SPORTCENTER = "sportcenter"
     CLIENT = "client"
+    CLIENT_PLAN = "client_plan"
     PLAN = "plan"
     PLAN_TECH = "plan_tech"
 
