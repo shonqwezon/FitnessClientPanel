@@ -1256,7 +1256,14 @@ class MainApplication(tk.Tk):
             return
         try:
             client = database.get_table(DbTable.CLIENT, fullname)[0]
+            try:
+                plan_db = database.get_table(DbTable.PLAN_TECH, client[0])
+            except exceptions.DbError:
+                plan_db = None
+                messagebox.showinfo(message="У клиента нет тарифа")
+
             logger.debug(client)
+            logger.debug(plan_db)
         except exceptions.DbError as ex:
             messagebox.showwarning(message=ex)
             return
@@ -1268,6 +1275,10 @@ class MainApplication(tk.Tk):
         #     text += str(client[i]) + "  "
 
         text = f"ФИО: {client[1]}\nБаланс: {client[2]}"
+
+        if plan_db:
+            plan = plan_db[0]
+            text += f"\n\nНазвание тарифа: {plan[1]}\nЗал: {plan[2]}"
 
         tk.Label(self, text=text).pack(pady=5)
 
