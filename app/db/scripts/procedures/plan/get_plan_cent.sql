@@ -1,5 +1,6 @@
 CREATE OR REPLACE FUNCTION app.get_plan(in_sportcenter_id INTEGER)
 RETURNS TABLE (id INTEGER,
+                name VARCHAR(50),
                 cost_per_month NUMERIC(8, 2),
                 begin_time TIME,
                 end_time TIME,
@@ -8,6 +9,7 @@ SECURITY DEFINER
 AS $$
 BEGIN
     RETURN QUERY SELECT p.id,
+                        p.name,
                         app.calculate_plan_cost(p.id) * 30 AS cost_per_month,
                         p.begin_time,
                         p.end_time,
