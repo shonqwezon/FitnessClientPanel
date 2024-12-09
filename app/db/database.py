@@ -76,10 +76,10 @@ class Database:
                 logger.error(e)
 
     def db(self, cmd: str):
-        query = sql.SQL("{0} DATABASE {1} {2}").format(
+        query = sql.SQL("{0} DATABASE {1}").format(
             sql.SQL(cmd),
             sql.Identifier(db_params["dbname"]),
-            sql.SQL("WITH (FORCE)" if cmd == DbCmd.DROP else ""),
+            # sql.SQL("WITH (FORCE)" if cmd == DbCmd.DROP else ""),
         )
         logger.debug(query)
         conn: connection = None
