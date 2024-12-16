@@ -9,7 +9,7 @@ from psycopg2.extensions import connection
 
 from app import setup_logger
 
-from .config import DbCmd, DbTable, db_params, db_params_su
+from .config import DbTable, db_params, db_params_su
 from .connectionManager import ConnectionManager
 from .exceptions import (
     CheckError,
@@ -31,13 +31,20 @@ class Database:
         logger.info("Init db")
         self.create_db()
         self.create_tables()
-        self.create_triggers()
-        self.create_procedures()
+        # self.create_triggers()
+        # self.create_procedures()
         self.pool = ConnectionManager(db_params, True)
 
     def drop_db(self):
         self.close()
-        self.db(DbCmd.DROP)
+        self.pool_su = ConnectionManager(db_params_su)
+        with self.pool_su.get_connection() as conn:
+            try:
+                with conn.cursor() as cursor:
+                    cursor.execute("call init.drop_db()")
+                    conn.commit()
+            except Exception as e:
+                logger.error(e)
 
     def drop_table(self, table_name: DbTable = None):
         logger.debug(f"drop_table {table_name}")
@@ -57,60 +64,25 @@ class Database:
                         raise UnknownError()
 
     def create_db(self):
-        self.db(DbCmd.CREATE)
-        logger.debug("Db has been created, now it is setting up...")
+        logger.debug("Setting up schema...")
         self.pool_su = ConnectionManager(db_params_su)
         with self.pool_su.get_connection() as conn:
             try:
                 with conn.cursor() as cursor:
-                    with open("app/db/scripts/setup_db.sql", "r", encoding="utf-8") as sql_file:
-                        cursor.execute(
-                            sql_file.read().format(
-                                user=db_params["user"],
-                                password=db_params["password"],
-                            )
-                        )
-
+                    cursor.execute("call init.setup_schema(%s)", (db_params["password"],))
                     conn.commit()
             except Exception as e:
                 logger.error(e)
 
-    def db(self, cmd: str):
-        query = sql.SQL("{0} DATABASE {1}").format(
-            sql.SQL(cmd),
-            sql.Identifier(db_params["dbname"]),
-            # sql.SQL("WITH (FORCE)" if cmd == DbCmd.DROP else ""),
-        )
-        logger.debug(query)
-        conn: connection = None
-        try:
-            t_db_params_su = db_params_su.copy()
-            t_db_params_su["dbname"] = "postgres"
-            conn = psycopg2.connect(**t_db_params_su)
-            conn.autocommit = True
-            cursor = conn.cursor()
-            cursor.execute(query)
-            if cmd == DbCmd.DROP:
-                cursor.execute(sql.SQL("DROP USER {0}").format(sql.SQL(db_params["user"])))
-        except Exception as e:
-            logger.error(f"Cannot {cmd} db: {e}")
-        finally:
-            conn.close()
-
     def create_tables(self):
         logger.debug("create_tables")
-        tables = [file for file in Path("app/db/scripts/tables").iterdir() if file.is_file()]
         with self.pool_su.get_connection() as conn:
             with conn.cursor() as cursor:
                 # Init tables
-                for table in tables:
-                    logger.debug(f"Creating {table}...")
-                    with open(table, "r", encoding="utf-8") as sql_file:
-                        cursor.execute(sql_file.read())
+                cursor.execute("call init.create_tables()")
                 # Init constraints
                 logger.debug("Adding constraints to tables...")
-                with open("app/db/scripts/constraints.sql", "r", encoding="utf-8") as sql_file:
-                    cursor.execute(sql_file.read())
+                cursor.execute("call init.add_constraints()")
             conn.commit()
 
     def create_triggers(self):

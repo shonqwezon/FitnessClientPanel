@@ -5,15 +5,15 @@ MIN_CONN = 1
 MAX_CONN = 10
 
 db_params = {
-    "dbname": getenv("DB_NAME"),
-    "user": getenv("DB_USER"),
+    "dbname": "fitness_db",
+    "user": "fitness_user",
     "password": getenv("DB_PASSWORD"),
     "host": getenv("DB_HOST"),
     "port": getenv("DB_PORT"),
 }
 
 db_params_su = {
-    "dbname": getenv("DB_NAME"),
+    "dbname": "fitness_db",
     "user": getenv("DB_USER_SU"),
     "password": getenv("DB_PASSWORD_SU"),
     "host": getenv("DB_HOST"),
@@ -29,8 +29,3 @@ class DbTable(StrEnum):
     CLIENT_PLAN = "client_plan"
     PLAN = "plan"
     PLAN_TECH = "plan_tech"
-
-
-class DbCmd:
-    CREATE = "CREATE"
-    DROP = "DROP"
