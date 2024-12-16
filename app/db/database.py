@@ -29,10 +29,8 @@ logger = setup_logger(__name__)
 class Database:
     def __init__(self):
         logger.info("Init db")
-        self.create_db()
+        self.create_schema()
         self.create_tables()
-        # self.create_triggers()
-        # self.create_procedures()
         self.pool = ConnectionManager(db_params, True)
 
     def drop_db(self):
@@ -63,7 +61,7 @@ class Database:
                     else:
                         raise UnknownError()
 
-    def create_db(self):
+    def create_schema(self):
         logger.debug("Setting up schema...")
         self.pool_su = ConnectionManager(db_params_su)
         with self.pool_su.get_connection() as conn:
@@ -83,29 +81,6 @@ class Database:
                 # Init constraints
                 logger.debug("Adding constraints to tables...")
                 cursor.execute("call init.add_constraints()")
-            conn.commit()
-
-    def create_triggers(self):
-        logger.debug("create_triggers")
-        triggers = [file for file in Path("app/db/scripts/triggers").iterdir() if file.is_file()]
-        with self.pool_su.get_connection() as conn:
-            with conn.cursor() as cursor:
-                for trigger in triggers:
-                    logger.debug(f"Creating {trigger}...")
-                    with open(trigger, "r", encoding="utf-8") as sql_file:
-                        cursor.execute(sql_file.read())
-            conn.commit()
-
-    def create_procedures(self):
-        logger.debug("create_procedures")
-        folder_path = Path("app/db/scripts/procedures")
-        procedures = [file for file in list(folder_path.rglob("*")) if file.is_file()]
-        with self.pool_su.get_connection() as conn:
-            with conn.cursor() as cursor:
-                for proc in procedures:
-                    logger.debug(f"Creating {proc}...")
-                    with open(proc, "r", encoding="utf-8") as sql_file:
-                        cursor.execute(sql_file.read())
             conn.commit()
 
     def is_admin(self, login: str, password: str) -> bool:
